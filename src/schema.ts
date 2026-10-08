@@ -1,11 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { clefModels } from "./clef.ts";
-import {
-	FACTORS_VERSION,
-	type FactorId,
-	factorIds,
-	factors,
-} from "./factors.ts";
+import { FACTORS_VERSION, type FactorId, factorIds } from "./factors.ts";
 
 /** Hard cap on request size (~90k words, at most 5 Clef calls) since the API is unauthenticated. */
 export const MAX_TEXT_CHARS = 500_000;
@@ -33,7 +28,9 @@ export const AnalyzeRequest = z
 
 const FactorResult = z
 	.object({ probability: Probability })
-	.openapi("FactorResult");
+	.openapi("FactorResult", {
+		description: "Probability (0 to 1) that the text exhibits this factor",
+	});
 
 export const AnalyzeResponse = z
 	.object({
@@ -44,12 +41,10 @@ export const AnalyzeResponse = z
 		}),
 		model: Model,
 		factors: z.object(
-			Object.fromEntries(
-				factorIds.map((id) => [
-					id,
-					FactorResult.openapi({ description: factors[id].label }),
-				]),
-			) as Record<FactorId, typeof FactorResult>,
+			Object.fromEntries(factorIds.map((id) => [id, FactorResult])) as Record<
+				FactorId,
+				typeof FactorResult
+			>,
 		),
 		usage: z
 			.object({
