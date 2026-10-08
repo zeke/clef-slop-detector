@@ -62,7 +62,7 @@ export const AnalyzeResponse = z
 			)
 			.openapi({
 				description:
-					"Probability for every factor, keyed by factor id. See GET /v1/factors for definitions.",
+					"Probability for every factor, keyed by factor id, highest probability first. See GET /v1/factors for definitions.",
 			}),
 		usage: z
 			.object({

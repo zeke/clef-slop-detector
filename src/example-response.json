@@ -2,35 +2,38 @@
 	"version": "2026-10-07",
 	"model": "clef",
 	"factors": {
-		"negation_reframe": {
-			"probability": 0.7168
-		},
-		"reflexive_triplets": {
-			"probability": 0.1483
-		},
-		"grandiose_stakes": {
-			"probability": 0.7955
-		},
-		"rhetorical_qa": {
-			"probability": 0.8313
-		},
 		"canned_opening": {
 			"probability": 0.9545
 		},
-		"announced_conclusion": {
-			"probability": 0.1233
+		"vague_claims": {
+			"probability": 0.939
 		},
 		"buzzwords": {
 			"probability": 0.937
 		},
-		"hollow_transitions": {
-			"probability": 0.023
+		"rhetorical_qa": {
+			"probability": 0.8313
+		},
+		"signposting": {
+			"probability": 0.799
+		},
+		"grandiose_stakes": {
+			"probability": 0.7955
+		},
+		"negation_reframe": {
+			"probability": 0.7168
 		},
 		"hype_adjectives": {
 			"probability": 0.4917
 		},
-		"vague_claims": {
-			"probability": 0.939
+		"reflexive_triplets": {
+			"probability": 0.1483
+		},
+		"chatbot_artifacts": {
+			"probability": 0.1303
+		},
+		"announced_conclusion": {
+			"probability": 0.1233
 		},
 		"hedging": {
 			"probability": 0.0571
@@ -38,11 +41,8 @@
 		"over_structuring": {
 			"probability": 0.0487
 		},
-		"signposting": {
-			"probability": 0.799
-		},
-		"chatbot_artifacts": {
-			"probability": 0.1303
+		"hollow_transitions": {
+			"probability": 0.023
 		}
 	},
 	"usage": {
