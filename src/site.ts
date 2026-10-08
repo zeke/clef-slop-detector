@@ -33,7 +33,7 @@ export const siteHtml = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>slop.how</title>
-<meta name="description" content="Find the slop before your readers do.">
+<meta name="description" content="A fast and free API for detecting sloppy text">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Creepster&text=slop.how&display=swap">
 <style>
@@ -60,7 +60,7 @@ a:hover { opacity: 1; color: var(--slime); }
 <body>
 <main>
 <h1>slop.how</h1>
-<p class="tagline">Find the slop before your readers do.</p>
+<p class="tagline">A fast and free API for detecting sloppy text</p>
 <p class="label">Paste this into your agent</p>
 <div class="block">
 <button type="button" id="copy">Copy</button>
