@@ -10,6 +10,8 @@ export interface FactorDefinition {
 	label: string;
 	instructions: string;
 	criteria: { true: string; false: string };
+	/** How to fix it. Shown to agents in llms.txt; not sent to Clef. */
+	advice: string;
 }
 
 export const factors = {
@@ -22,6 +24,7 @@ export const factors = {
 			false:
 				"No such pattern, or a single contrast where the distinction is the actual point",
 		},
+		advice: 'State the point directly. Drop the "it\'s not X" setup.',
 	},
 	reflexive_triplets: {
 		label: "Reflexive triplets",
@@ -31,6 +34,7 @@ export const factors = {
 			true: "Repeated triplets that feel like cadence, not content",
 			false: "Lists vary in length or reflect the real number of items",
 		},
+		advice: "Use as many items as there really are. Two or four is fine.",
 	},
 	grandiose_stakes: {
 		label: "Grandiose stakes",
@@ -40,6 +44,7 @@ export const factors = {
 			true: "Claims of broad importance that the content doesn't support",
 			false: "Significance is stated plainly or backed by specifics",
 		},
+		advice: "Cut the inflated claim, or back it with a specific result.",
 	},
 	rhetorical_qa: {
 		label: "Rhetorical Q&A",
@@ -49,6 +54,7 @@ export const factors = {
 			true: "Uses this device, especially repeatedly",
 			false: "Questions are genuine or absent",
 		},
+		advice: "Turn the question and answer into one plain statement.",
 	},
 	canned_opening: {
 		label: "Canned opening",
@@ -58,6 +64,7 @@ export const factors = {
 			true: "The opening could be pasted onto any article on the topic",
 			false: "The opening is specific to this piece",
 		},
+		advice: "Start with the specific point, fact, or example.",
 	},
 	announced_conclusion: {
 		label: "Announced conclusion",
@@ -67,6 +74,7 @@ export const factors = {
 			true: "The ending summarizes or moralizes instead of adding anything",
 			false: "The ending is short, specific, or just stops",
 		},
+		advice: "End on the last useful point. Cut the recap.",
 	},
 	buzzwords: {
 		label: "AI buzzwords",
@@ -76,6 +84,7 @@ export const factors = {
 			true: "Several such words used where an ordinary word would do",
 			false: "None, or used as precise technical terms",
 		},
+		advice: "Swap each one for the plain word: use, help, improve, area.",
 	},
 	hollow_transitions: {
 		label: "Hollow transitions",
@@ -85,6 +94,7 @@ export const factors = {
 			true: "Filler transitions appear repeatedly",
 			false: "Sentences connect with plain words (and, but, so) or none",
 		},
+		advice: "Delete the transition, or use and, but, or so.",
 	},
 	hype_adjectives: {
 		label: "Hype adjectives",
@@ -94,6 +104,7 @@ export const factors = {
 			true: "Enthusiasm is asserted rather than shown",
 			false: "Tone is matter-of-fact, or praise is backed by specifics",
 		},
+		advice: "Remove the intensifier, or show the evidence that earns it.",
 	},
 	vague_claims: {
 		label: "Vague claims",
@@ -103,6 +114,7 @@ export const factors = {
 			true: "Mostly abstractions that could apply to anything",
 			false: "Grounded in specific, checkable details",
 		},
+		advice: "Add a name, number, example, or first-hand detail.",
 	},
 	hedging: {
 		label: "Excessive hedging",
@@ -113,6 +125,7 @@ export const factors = {
 			false:
 				"Claims are direct, or uncertainty is stated once where it matters",
 		},
+		advice: "Commit to the claim, or state the real uncertainty once.",
 	},
 	over_structuring: {
 		label: "Over-structuring",
@@ -122,6 +135,7 @@ export const factors = {
 			true: "Formatting outweighs the content it organizes",
 			false: "Formatting is light or proportionate to the content",
 		},
+		advice: "Merge into paragraphs. Keep lists for real lists.",
 	},
 	signposting: {
 		label: "Signposting",
@@ -131,6 +145,7 @@ export const factors = {
 			true: "Repeated announcements of what's coming next",
 			false: "The text just proceeds",
 		},
+		advice: "Delete the announcement and get to the content.",
 	},
 	chatbot_artifacts: {
 		label: "Chatbot artifacts",
@@ -140,6 +155,7 @@ export const factors = {
 			true: "Any assistant-style framing addressed to a requester",
 			false: "None",
 		},
+		advice: "Delete the assistant framing.",
 	},
 } as const satisfies Record<string, FactorDefinition>;
 

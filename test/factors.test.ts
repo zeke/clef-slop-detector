@@ -29,6 +29,7 @@ describe("factors", () => {
 			expect(f.instructions).toMatch(/\?$/);
 			expect(f.criteria.true.length).toBeGreaterThan(0);
 			expect(f.criteria.false.length).toBeGreaterThan(0);
+			expect(f.advice).toMatch(/^[A-Z].*\.$/);
 		},
 	);
 });
