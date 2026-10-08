@@ -65,6 +65,9 @@ export const Factor = z
 		label: z.string(),
 		instructions: z.string(),
 		criteria: z.object({ true: z.string(), false: z.string() }),
+		advice: z
+			.string()
+			.openapi({ description: "How to fix writing that shows this factor" }),
 	})
 	.openapi("Factor");
 

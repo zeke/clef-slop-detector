@@ -16,10 +16,20 @@ describe("GET /llms.txt", () => {
 		expect(body).not.toMatch(/^###/m);
 	});
 
-	it("lists every factor with its label", async () => {
+	it("lists every factor with its label and advice", async () => {
 		const body = await (await get("http://localhost/llms.txt")).text();
 		for (const id of factorIds)
-			expect(body).toContain(`- \`${id}\`: ${factors[id].label}`);
+			expect(body).toContain(
+				`- \`${id}\` (${factors[id].label}): ${factors[id].advice}`,
+			);
+	});
+
+	it("tells agents to review the writing, not dump scores", async () => {
+		const body = await (await get("http://localhost/llms.txt")).text();
+		expect(body).toMatch(/0\.5 or higher/);
+		expect(body).toMatch(/quote/i);
+		expect(body).toMatch(/revised version/i);
+		expect(body).toMatch(/Don't show the raw JSON/);
 	});
 
 	it("links to the API using the request origin", async () => {

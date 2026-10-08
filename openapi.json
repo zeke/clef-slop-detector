@@ -237,13 +237,18 @@
 							"true",
 							"false"
 						]
+					},
+					"advice": {
+						"type": "string",
+						"description": "How to fix writing that shows this factor"
 					}
 				},
 				"required": [
 					"id",
 					"label",
 					"instructions",
-					"criteria"
+					"criteria",
+					"advice"
 				]
 			}
 		},

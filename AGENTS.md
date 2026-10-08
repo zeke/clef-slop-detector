@@ -31,7 +31,7 @@ Production: https://slop.how (website) and https://api.slop.how (API), both serv
 
 ## Layout
 
-- `src/factors.ts`: factor definitions (the Clef questions). `FACTORS_VERSION` must be bumped whenever wording changes.
+- `src/factors.ts`: factor definitions. `instructions` and `criteria` are the Clef questions; bump `FACTORS_VERSION` whenever they change. `advice` is how to fix the problem; it's shown to agents in llms.txt and `/v1/factors` but never sent to Clef, so changing it doesn't need a version bump.
 - `src/clef.ts`: builds Clef requests, validates Clef responses with Zod, model prices
 - `src/chunk.ts`: lossless sentence-aligned chunking for long text
 - `src/analyze.ts`: core: chunk, call Clef per chunk in parallel, take max probability per factor, sum usage
@@ -62,7 +62,7 @@ Follows "Scripts to Rule Them All". Use these instead of raw npm commands.
 - `POST /v1/analyze` `{ text, model? }` returns `{ version, model, factors: { <id>: { probability } }, usage }`
 - `GET /v1/factors` returns factor definitions
 - `GET /openapi.json`
-- `GET /llms.txt`: agent-facing summary (llmstxt.org format). Keep it in sync with API changes; tests check it lists every factor.
+- `GET /llms.txt`: agent-facing summary (llmstxt.org format). Includes a review workflow telling agents to give writing feedback (flag factors at 0.5 or higher, quote passages, suggest rewrites, end with a revised text) rather than dump scores. Keep it in sync with API changes; tests check it lists every factor with its advice.
 - `GET /` serves the homepage on every host
 
 Text over 20,000 words is split into chunks at sentence boundaries, one Clef
