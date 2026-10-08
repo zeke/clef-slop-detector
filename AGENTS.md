@@ -55,6 +55,7 @@ Follows "Scripts to Rule Them All". Use these instead of raw npm commands.
 - `script/lint`: Biome check, fails on warnings; `script/lint --fix` to apply fixes
 - `script/openapi`: regenerate `openapi.json` after changing schemas or routes
 - `script/server`: local dev server via `cf dev` (Vite) at http://localhost:5190 (pinned with `strictPort` so it never drifts onto another project's port). The AI binding is remote, so it calls real Clef and costs money. A dev-only `liveReload` plugin in `vite.config.ts` injects Vite's client into the Worker's HTML responses and reloads the page when anything in `src/` changes.
+- `script/preview.ts <deploy|destroy>`: used by the Preview workflow; needs the PR, GitHub, and Cloudflare env vars it lists at the top. Not meant for local use.
 - `script/smoke [base-url]`: real Clef calls against crafted samples via the typed client. Defaults to production. Under $0.01 per run. Run it after changing factor wording.
 
 ## API
@@ -80,6 +81,18 @@ Read, DNS Write, and Workers Routes Write on the slop.how zone (needed for the
 custom domains). The cf OAuth session can create tokens but not update or
 delete them; change permissions by creating a new token, swapping the secret,
 and deleting the old token in the dashboard (Profile > API Tokens).
+
+`.github/workflows/preview.yml` deploys a native Worker Preview per PR with
+`script/preview.ts`, in parallel with CI. Each PR gets
+`https://pr-<N>-clef-slop-detector.ziki.workers.dev` (public, `noindex`),
+reported through the GitHub Deployments API in a per-PR environment
+`preview/pr-<N>` (never one shared environment, or GitHub deactivates other
+PRs' previews). No PR comments. The script probes `/v1/factors`, skips marking
+success if a newer commit landed, and on close deletes the preview through the
+REST API and marks its deployments inactive. Fork PRs are skipped since they
+don't get secrets. Previews share the production AI binding, so analyze calls
+on a preview are billed like production. The homepage, `/llms.txt`, and the
+prompt all point at the serving host on previews and localhost.
 
 ## Models
 
@@ -141,6 +154,15 @@ All three miss single mild instances of rhetorical_qa, reflexive_triplets, and s
 - Declaring `domains` in `cloudflare.config.ts` disables the workers.dev URL
   (and preview URLs) unless workers.dev is enabled explicitly. The old
   clef-slop-detector.ziki.workers.dev URL now returns 404.
+- `cloudflare.config.ts` is function-form because `cf previews deploy` rejects
+  `domains`; they're only set when `isPreview` is false. `previewUrls: true`
+  maps to the Worker's `subdomain.previews_enabled` and is what serves previews
+  on workers.dev while `subdomain.enabled` stays false. It only gets applied by
+  `cf deploy` or `cf workers triggers deploy`, not by `cf previews deploy`, so
+  it stays set in both modes.
+- `cf` (1.0.0-beta.13) can deploy previews but has no command to delete or list
+  them. `script/preview.ts` calls
+  `/accounts/{account_id}/workers/workers/{worker}/previews` directly.
 
 - If `cf` commands fail with `[10000] Authentication error` while logged in,
   a stray `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_API_KEY`/`CLOUDFLARE_ACCOUNT_ID`

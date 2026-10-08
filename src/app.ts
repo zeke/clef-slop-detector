@@ -98,7 +98,7 @@ app.doc31("/openapi.json", openApiConfig);
 app.get("/", (c) =>
 	new URL(c.req.url).hostname === new URL(API_ORIGIN).hostname
 		? c.redirect("/openapi.json")
-		: c.html(siteHtml),
+		: c.html(siteHtml(c.req.url)),
 );
 app.get("/llms.txt", (c) =>
 	c.body(llmsTxt(apiOrigin(c.req.url)), 200, {
