@@ -40,23 +40,32 @@ You get back a probability for each factor, plus usage and cost:
 }
 ```
 
-Add `"model": "clef-flash"` for a faster, cheaper model. There's no auth for now.
+Add `"model": "clef-flash"` for a faster, cheaper model.
 
-Other endpoints:
+## API
 
-- `GET /v1/factors`: every factor and the exact question asked about it
-- `GET /openapi.json`: the full API contract
-- `GET /llms.txt`: a summary for agents
+The base URL is `https://api.slop.how`. There's no auth for now.
 
-TypeScript callers can get a typed client from Hono with the exported `AppType`. Other Workers can call `analyze({ text })` directly over a service binding.
+| Method | Path            | What it does                                                         |
+| ------ | --------------- | -------------------------------------------------------------------- |
+| POST   | `/v1/analyze`   | Score text against every factor                                      |
+| GET    | `/v1/factors`   | List the factors, the question asked about each, and how to fix it   |
+| GET    | `/openapi.json` | The full request and response contract                               |
+| GET    | `/llms.txt`     | Instructions for agents, including how to turn scores into feedback  |
+
+The OpenAPI spec at [api.slop.how/openapi.json](https://api.slop.how/openapi.json) is generated from the Zod schemas in [src/schema.ts](./src/schema.ts), and a copy is committed as [openapi.json](./openapi.json). TypeScript callers can get a typed client from Hono with the exported `AppType`. Other Workers can call `analyze({ text })` directly over a service binding.
 
 ## How it works
 
-[Clef](https://developers.cloudflare.com/workers-ai/models/clef/) is a decision model from Cloudflare. Instead of generating text, it reads an input and a set of typed questions, then returns a probability for each answer.
+Most AI models people use today are large language models. You give them a prompt and they write text back, one token at a time. That's great for drafting and chatting, but it's slow and expensive when all you want is the answer to a yes-or-no question, and you still have to parse whatever the model wrote.
 
-This API asks Clef one yes/no question per factor, all in a single call. For example, `canned_opening` asks "Does the text open with a generic scene-setter about the era, the world, or the importance of the topic?" The questions live in [src/factors.ts](./src/factors.ts). Long text is split into chunks, and each factor takes its highest score across chunks.
+[Clef](https://developers.cloudflare.com/workers-ai/models/clef/) is a different kind of model. Cloudflare calls it a decision model. TypeSafe AI, which makes a similar model called [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev), calls the category "System One models." Instead of writing text, a decision model takes some input plus a list of typed questions, and returns a probability for every allowed answer. It reads the input once and answers all the questions in parallel, so there's no output to wait for and nothing to parse. Clef runs on Workers AI, Cloudflare's GPU network, and this API is a Cloudflare Worker that calls it.
 
-Clef only charges for input tokens. A 500-word page costs about $0.0005.
+A factor is one specific habit that shows up a lot in AI-generated writing: opening with "In today's fast-paced world," setting up "it's not X, it's Y," answering your own question for drama ("The result?"), or leaning on words like "leverage" and "seamless." There are 14 of them. Each factor is a yes-or-no question for Clef, with a short description of what yes and no look like, plus a note on how to fix it. They all live in [src/factors.ts](./src/factors.ts).
+
+When you send text, the API passes it to Clef along with all 14 questions in a single call. Clef returns, for each factor, the probability that the text has it. A 0.95 means Clef is confident the habit is there, and 0.05 means it's confident it isn't. Long text gets split into chunks, and each factor keeps its highest score across chunks. The API returns those probabilities as they are. It doesn't roll them up into a single "slop score," because any weighting would be a number I made up.
+
+The whole thing is meant to be fast and cheap. A 580-word blog post comes back in about a second. Clef charges $0.24 per million input tokens and nothing for output. The 14 questions add about 1,700 tokens to every call, so a 500-word page costs about $0.0005, or about 1,800 checks for a dollar. `clef-flash` costs $0.09 per million tokens.
 
 It doesn't tell you whether a human or an AI wrote something. I tried that first, since this started as a cheaper alternative to [Pangram](https://www.pangram.com) for [zeke/slop-detector](https://github.com/zeke/slop-detector). Clef is good at spotting the clichés but not at judging authorship. Polished AI writing scored as human, and stiff human writing scored as AI. So this API reports the factors and leaves authorship alone.
 
