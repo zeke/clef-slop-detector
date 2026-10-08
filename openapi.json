@@ -1,0 +1,320 @@
+{
+	"openapi": "3.1.0",
+	"info": {
+		"title": "clef-slop-detector",
+		"version": "2026-10-07",
+		"description": "Scores text against slop factors using Cloudflare's Clef decision model."
+	},
+	"components": {
+		"schemas": {
+			"AnalyzeResponse": {
+				"type": "object",
+				"properties": {
+					"version": {
+						"type": "string",
+						"description": "Factor definition version. Results change when this changes.",
+						"example": "2026-10-07"
+					},
+					"model": {
+						"type": "string",
+						"enum": [
+							"clef",
+							"clef-flash"
+						],
+						"description": "Clef variant. clef is the 27B model; clef-flash is the faster, cheaper 9B model."
+					},
+					"factors": {
+						"type": "object",
+						"properties": {
+							"negation_reframe": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"reflexive_triplets": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"grandiose_stakes": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"rhetorical_qa": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"canned_opening": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"announced_conclusion": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"buzzwords": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"hollow_transitions": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"hype_adjectives": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"vague_claims": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"hedging": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"over_structuring": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"signposting": {
+								"$ref": "#/components/schemas/FactorResult"
+							},
+							"chatbot_artifacts": {
+								"$ref": "#/components/schemas/FactorResult"
+							}
+						},
+						"required": [
+							"negation_reframe",
+							"reflexive_triplets",
+							"grandiose_stakes",
+							"rhetorical_qa",
+							"canned_opening",
+							"announced_conclusion",
+							"buzzwords",
+							"hollow_transitions",
+							"hype_adjectives",
+							"vague_claims",
+							"hedging",
+							"over_structuring",
+							"signposting",
+							"chatbot_artifacts"
+						]
+					},
+					"usage": {
+						"$ref": "#/components/schemas/Usage"
+					}
+				},
+				"required": [
+					"version",
+					"model",
+					"factors",
+					"usage"
+				]
+			},
+			"FactorResult": {
+				"type": "object",
+				"properties": {
+					"probability": {
+						"type": "number",
+						"minimum": 0,
+						"maximum": 1
+					}
+				},
+				"required": [
+					"probability"
+				],
+				"description": "Probability (0 to 1) that the text exhibits this factor"
+			},
+			"Usage": {
+				"type": "object",
+				"properties": {
+					"chunks": {
+						"type": "integer",
+						"exclusiveMinimum": 0,
+						"description": "Number of Clef calls. Long text is split into chunks."
+					},
+					"words": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"inputTokens": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"costUsd": {
+						"type": "number",
+						"minimum": 0
+					}
+				},
+				"required": [
+					"chunks",
+					"words",
+					"inputTokens",
+					"costUsd"
+				]
+			},
+			"ErrorResponse": {
+				"type": "object",
+				"properties": {
+					"error": {
+						"type": "string"
+					},
+					"issues": {
+						"type": "array",
+						"items": {}
+					}
+				},
+				"required": [
+					"error"
+				]
+			},
+			"AnalyzeRequest": {
+				"type": "object",
+				"properties": {
+					"text": {
+						"type": "string",
+						"maxLength": 500000,
+						"pattern": "\\S",
+						"example": "In today's fast-paced digital landscape, it's important to note that..."
+					},
+					"model": {
+						"type": "string",
+						"enum": [
+							"clef",
+							"clef-flash"
+						],
+						"default": "clef",
+						"description": "Clef variant. clef is the 27B model; clef-flash is the faster, cheaper 9B model."
+					}
+				},
+				"required": [
+					"text"
+				]
+			},
+			"FactorsResponse": {
+				"type": "object",
+				"properties": {
+					"version": {
+						"type": "string"
+					},
+					"factors": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/Factor"
+						}
+					}
+				},
+				"required": [
+					"version",
+					"factors"
+				]
+			},
+			"Factor": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"enum": [
+							"negation_reframe",
+							"reflexive_triplets",
+							"grandiose_stakes",
+							"rhetorical_qa",
+							"canned_opening",
+							"announced_conclusion",
+							"buzzwords",
+							"hollow_transitions",
+							"hype_adjectives",
+							"vague_claims",
+							"hedging",
+							"over_structuring",
+							"signposting",
+							"chatbot_artifacts"
+						]
+					},
+					"label": {
+						"type": "string"
+					},
+					"instructions": {
+						"type": "string"
+					},
+					"criteria": {
+						"type": "object",
+						"properties": {
+							"true": {
+								"type": "string"
+							},
+							"false": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"true",
+							"false"
+						]
+					}
+				},
+				"required": [
+					"id",
+					"label",
+					"instructions",
+					"criteria"
+				]
+			}
+		},
+		"parameters": {}
+	},
+	"paths": {
+		"/v1/analyze": {
+			"post": {
+				"summary": "Score text against the slop factors",
+				"requestBody": {
+					"description": "Text to analyze",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AnalyzeRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Per-factor probabilities",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AnalyzeResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					},
+					"502": {
+						"description": "Clef returned an error or an unexpected response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/factors": {
+			"get": {
+				"summary": "List the slop factors and the questions sent to Clef",
+				"responses": {
+					"200": {
+						"description": "Factor definitions",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/FactorsResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"webhooks": {}
+}

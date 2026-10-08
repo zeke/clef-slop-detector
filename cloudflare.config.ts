@@ -7,7 +7,7 @@ export default defineConfig({
 		compatibilityDate: "2026-10-01",
 		entrypoint,
 		env: {
-			AI: bindings.ai(),
+			AI: bindings.ai({ dev: { remote: true } }),
 		},
 	},
 });

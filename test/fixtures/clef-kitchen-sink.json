@@ -1,0 +1,65 @@
+{
+	"model": "clef",
+	"answers": {
+		"negation_reframe": {
+			"type": "noul",
+			"noul": 0.0905
+		},
+		"reflexive_triplets": {
+			"type": "noul",
+			"noul": 0.7966
+		},
+		"grandiose_stakes": {
+			"type": "noul",
+			"noul": 0.9412
+		},
+		"rhetorical_qa": {
+			"type": "noul",
+			"noul": 0.0232
+		},
+		"canned_opening": {
+			"type": "noul",
+			"noul": 0.9637
+		},
+		"announced_conclusion": {
+			"type": "noul",
+			"noul": 0.943
+		},
+		"buzzwords": {
+			"type": "noul",
+			"noul": 0.9431
+		},
+		"hollow_transitions": {
+			"type": "noul",
+			"noul": 0.6242
+		},
+		"hype_adjectives": {
+			"type": "noul",
+			"noul": 0.7342
+		},
+		"vague_claims": {
+			"type": "noul",
+			"noul": 0.9507
+		},
+		"hedging": {
+			"type": "noul",
+			"noul": 0.074
+		},
+		"over_structuring": {
+			"type": "noul",
+			"noul": 0.034
+		},
+		"signposting": {
+			"type": "noul",
+			"noul": 0.0645
+		},
+		"chatbot_artifacts": {
+			"type": "noul",
+			"noul": 0.0353
+		}
+	},
+	"usage": {
+		"input_tokens": 2114,
+		"output_tokens": 0
+	}
+}

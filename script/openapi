@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Regenerate openapi.json from the Zod schemas. A test fails if it's stale.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+node --input-type=module -e '
+import { writeFileSync } from "node:fs";
+const { openApiDocument } = await import("./src/app.ts");
+writeFileSync("openapi.json", JSON.stringify(openApiDocument(), null, "\t") + "\n");
+console.log("wrote openapi.json");
+'

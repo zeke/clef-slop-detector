@@ -2,4 +2,4 @@
 # Lint and check formatting. Pass --fix to apply fixes.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-if [[ "${1:-}" == "--fix" ]]; then npx biome check --write .; else npx biome check .; fi
+if [[ "${1:-}" == "--fix" ]]; then npx biome check --write . && npx biome format --write .; else npx biome check --error-on-warnings .; fi
