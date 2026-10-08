@@ -5,13 +5,12 @@ An HTTP API that scores text for "slop": the stylistic tells that show up in a l
 Paste this into your coding agent:
 
 ```
-Read https://clef-slop-detector.ziki.workers.dev/llms.txt, then use that API to
-analyze the text below. List the factors that score above 0.7, quote the
-passages that likely triggered each one, and suggest a plainer rewrite.
+Use https://clef-slop-detector.ziki.workers.dev/llms.txt to review this text:
 
-<text>
-PASTE YOUR TEXT HERE
-</text>
+In today's fast-paced digital landscape, remote work isn't just a trend. It's a
+revolution. By leveraging cutting-edge collaboration tools, teams can unlock
+unprecedented productivity and foster a culture of innovation. The result? A
+seamless, empowered workforce. Let's dive in.
 ```
 
 ## Usage
