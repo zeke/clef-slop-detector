@@ -54,7 +54,7 @@ Follows "Scripts to Rule Them All". Use these instead of raw npm commands.
 - `script/typecheck`: generate Worker types, run `tsc` for Worker code and tests, then `tsc -p tsconfig.node.json` for Node scripts
 - `script/lint`: Biome check, fails on warnings; `script/lint --fix` to apply fixes
 - `script/openapi`: regenerate `openapi.json` after changing schemas or routes
-- `script/server`: local dev server via `cf dev`. The AI binding is remote, so it calls real Clef and costs money.
+- `script/server`: local dev server via `cf dev` (Vite) at http://localhost:5190 (pinned with `strictPort` so it never drifts onto another project's port). The AI binding is remote, so it calls real Clef and costs money. A dev-only `liveReload` plugin in `vite.config.ts` injects Vite's client into the Worker's HTML responses and reloads the page when anything in `src/` changes.
 - `script/smoke [base-url]`: real Clef calls against crafted samples via the typed client. Defaults to production. Under $0.01 per run. Run it after changing factor wording.
 
 ## API
@@ -150,6 +150,7 @@ All three miss single mild instances of rhetorical_qa, reflexive_triplets, and s
   so `env.AI.run("@cf/cloudflare/clef", ...)` hits the untyped fallback
   overload. Clef responses are validated with a Zod schema at the boundary.
 - The AI binding needs `dev: { remote: true }` in `cloudflare.config.ts`, or `cf dev` fails with "Binding AI needs to be run remotely".
+- The `liveReload` plugin has to wrap `res.writeHead`: the Cloudflare Vite plugin passes headers as an object to `writeHead`, so `res.getHeader` can't see the content type and `content-length` must be dropped there.
 - `vitest.config.ts` exists separately from `vite.config.ts` so Vitest doesn't
   load the Cloudflare Vite plugin.
 - `@cloudflare/vitest-pool-workers` was renamed to `@cloudflare/vitest-plugin`. It isn't used, because Clef is always mocked in tests.
