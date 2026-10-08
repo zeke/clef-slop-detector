@@ -1,11 +1,11 @@
 # clef-slop-detector
 
-An HTTP API that scores text for "slop": the stylistic tells that show up in a lot of AI-generated writing, like canned openings, negation reframes ("It's not X, it's Y"), buzzwords, and chatbot residue.
+An HTTP API that scores text for "slop": the stylistic tells that show up in a lot of AI-generated writing, like canned openings, negation reframes ("It's not X, it's Y"), buzzwords, and chatbot residue. It lives at [slop.how](https://slop.how).
 
 Paste this into your coding agent:
 
 ```
-Use https://clef-slop-detector.ziki.workers.dev/llms.txt to review this text:
+Use https://slop.how/llms.txt to review this text:
 
 In today's fast-paced digital landscape, remote work isn't just a trend. It's a
 revolution. By leveraging cutting-edge collaboration tools, teams can unlock
@@ -18,7 +18,7 @@ seamless, empowered workforce. Let's dive in.
 Send text to `POST /v1/analyze`:
 
 ```sh
-curl -s https://clef-slop-detector.ziki.workers.dev/v1/analyze \
+curl -s https://api.slop.how/v1/analyze \
   -H 'content-type: application/json' \
   -d '{"text": "Great question! In today'\''s fast-paced digital landscape, it'\''s not just about speed. It'\''s about trust. Let'\''s dive in."}'
 ```

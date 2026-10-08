@@ -98,11 +98,3 @@ describe("OpenAPI", () => {
 		expect(committedOpenApi).toEqual(openApiDocument());
 	});
 });
-
-describe("GET /", () => {
-	it("redirects to the OpenAPI document", async () => {
-		const res = await app.request("/", {}, { AI: fakeAi() });
-		expect(res.status).toBe(302);
-		expect(res.headers.get("location")).toBe("/openapi.json");
-	});
-});

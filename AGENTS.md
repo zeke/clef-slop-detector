@@ -12,7 +12,11 @@ decision model (`@cf/cloudflare/clef`). It returns a probability per factor.
 It does not try to say whether a human or an AI wrote the text; see "Spike
 findings" for why.
 
-Production: https://clef-slop-detector.ziki.workers.dev (no auth yet)
+Production: https://slop.how (website) and https://api.slop.how (API), both served by one Worker via custom domains in `cloudflare.config.ts`. Also reachable at https://clef-slop-detector.ziki.workers.dev. No auth yet.
+
+## Domain
+
+`slop.how` was registered on Cloudflare Registrar on 2026-10-08 ($20.20/yr, same renewal) in the personal account. Zone ID `11e2c7374bb602cd831d2b60f721a464`.
 
 ## Stack
 
@@ -33,6 +37,7 @@ Production: https://clef-slop-detector.ziki.workers.dev (no auth yet)
 - `src/analyze.ts`: core: chunk, call Clef per chunk in parallel, take max probability per factor, sum usage
 - `src/schema.ts`: public API schemas (`AnalyzeRequest`, `AnalyzeResponse`, `FactorsResponse`, `ErrorResponse`)
 - `src/llms.ts`: generates `/llms.txt` from the factor definitions, with links built from the request origin
+- `src/site.ts`: the slop.how homepage (one inline HTML page with the copy-paste agent prompt) and `apiOrigin()`, which makes `/llms.txt` on slop.how link to api.slop.how
 - `src/app.ts`: Hono app, routes, OpenAPI document. Exports `AppType` for `hc<AppType>` typed clients.
 - `src/index.ts`: Worker entrypoint. `fetch` delegates to the Hono app; `analyze()` is a JS RPC method for service bindings. Only file that imports `cloudflare:workers`.
 - `openapi.json`: generated, committed. A test fails if it's stale.
@@ -57,7 +62,7 @@ Follows "Scripts to Rule Them All". Use these instead of raw npm commands.
 - `GET /v1/factors` returns factor definitions
 - `GET /openapi.json`
 - `GET /llms.txt`: agent-facing summary (llmstxt.org format). Keep it in sync with API changes; tests check it lists every factor.
-- `GET /` redirects to `/openapi.json`
+- `GET /` serves the homepage on every host
 
 Text over 20,000 words is split into chunks at sentence boundaries, one Clef
 call per chunk. Each factor's document probability is the max across chunks.
@@ -69,7 +74,10 @@ Requests are capped at 500,000 characters because the API is unauthenticated.
 to main. Pushes to main then deploy with `cf deploy`, using the
 `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repo secrets. The token is
 named "clef-slop-detector GitHub Actions deploy" and is scoped to Workers
-Scripts Write and Account Settings Read on the personal account.
+Scripts Write and Account Settings Read on the personal account, plus Zone
+Read, DNS Write, and Workers Routes Write on the slop.how zone (needed for the
+custom domains). The cf OAuth session can create tokens but not update or
+delete them; change permissions by creating a new token and swapping the secret.
 
 ## Pricing
 

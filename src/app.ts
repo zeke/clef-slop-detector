@@ -9,6 +9,7 @@ import {
 	ErrorResponse,
 	FactorsResponse,
 } from "./schema.ts";
+import { apiOrigin, siteHtml } from "./site.ts";
 
 export interface Bindings {
 	AI: AiRunner;
@@ -83,9 +84,9 @@ const openApiConfig = {
 export const openApiDocument = () => app.getOpenAPI31Document(openApiConfig);
 
 app.doc31("/openapi.json", openApiConfig);
-app.get("/", (c) => c.redirect("/openapi.json"));
+app.get("/", (c) => c.html(siteHtml));
 app.get("/llms.txt", (c) =>
-	c.body(llmsTxt(new URL(c.req.url).origin), 200, {
+	c.body(llmsTxt(apiOrigin(c.req.url)), 200, {
 		"content-type": "text/markdown; charset=utf-8",
 	}),
 );
