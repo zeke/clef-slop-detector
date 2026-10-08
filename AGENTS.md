@@ -32,6 +32,7 @@ Production: https://clef-slop-detector.ziki.workers.dev (no auth yet)
 - `src/chunk.ts`: lossless sentence-aligned chunking for long text
 - `src/analyze.ts`: core: chunk, call Clef per chunk in parallel, take max probability per factor, sum usage
 - `src/schema.ts`: public API schemas (`AnalyzeRequest`, `AnalyzeResponse`, `FactorsResponse`, `ErrorResponse`)
+- `src/llms.ts`: generates `/llms.txt` from the factor definitions, with links built from the request origin
 - `src/app.ts`: Hono app, routes, OpenAPI document. Exports `AppType` for `hc<AppType>` typed clients.
 - `src/index.ts`: Worker entrypoint. `fetch` delegates to the Hono app; `analyze()` is a JS RPC method for service bindings. Only file that imports `cloudflare:workers`.
 - `openapi.json`: generated, committed. A test fails if it's stale.
@@ -55,6 +56,7 @@ Follows "Scripts to Rule Them All". Use these instead of raw npm commands.
 - `POST /v1/analyze` `{ text, model? }` returns `{ version, model, factors: { <id>: { probability } }, usage }`
 - `GET /v1/factors` returns factor definitions
 - `GET /openapi.json`
+- `GET /llms.txt`: agent-facing summary (llmstxt.org format). Keep it in sync with API changes; tests check it lists every factor.
 - `GET /` redirects to `/openapi.json`
 
 Text over 20,000 words is split into chunks at sentence boundaries, one Clef
