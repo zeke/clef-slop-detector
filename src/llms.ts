@@ -3,7 +3,7 @@ import { MAX_TEXT_CHARS } from "./schema.ts";
 
 /** llms.txt (https://llmstxt.org) for agents, generated from the factor definitions so it can't drift. */
 export function llmsTxt(origin: string): string {
-	return `# clef-slop-detector
+	return `# slop.how
 
 > HTTP API that scores text against ${factorIds.length} "slop factors" (stylistic tells common in AI-generated prose) using Cloudflare's Clef decision model. It returns a probability from 0 to 1 for each factor. It does not detect whether a human or an AI wrote the text.
 

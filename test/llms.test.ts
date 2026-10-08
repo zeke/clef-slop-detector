@@ -11,7 +11,7 @@ describe("GET /llms.txt", () => {
 		expect(res.status).toBe(200);
 		expect(res.headers.get("content-type")).toMatch(/^text\/markdown/);
 		const body = await res.text();
-		expect(body).toMatch(/^# clef-slop-detector\n\n> \S/);
+		expect(body).toMatch(/^# slop.how\n\n> \S/);
 		// Only H1 and H2 headings are allowed by the format.
 		expect(body).not.toMatch(/^###/m);
 	});
