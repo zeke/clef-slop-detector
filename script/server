@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Start a local dev server. The AI binding calls the real Clef API.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+npx cf dev

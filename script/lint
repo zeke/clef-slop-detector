@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Lint and check formatting. Pass --fix to apply fixes.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+if [[ "${1:-}" == "--fix" ]]; then npx biome check --write .; else npx biome check .; fi

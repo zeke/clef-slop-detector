@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Run unit tests. Clef is mocked, so this is free and offline.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+npx vitest run "$@"

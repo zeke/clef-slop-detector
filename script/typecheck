@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Generate Worker types from cloudflare.config.ts, then typecheck (including type tests).
+set -euo pipefail
+cd "$(dirname "$0")/.."
+npx cf workers types >/dev/null
+npx tsc
