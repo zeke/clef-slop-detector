@@ -2,6 +2,18 @@ export const SITE_HOST = "slop.how";
 export const API_ORIGIN = "https://api.slop.how";
 const REPO_URL = "https://github.com/zeke/clef-slop-detector";
 
+// A real response for the sample text below, captured from production.
+// Tests validate it against AnalyzeResponse so it can't drift from the schema.
+import exampleResponse from "./example-response.json" with { type: "json" };
+
+/** Pretty-print JSON, collapsing single-property objects onto one line. */
+function compactJson(value: unknown): string {
+	return JSON.stringify(value, null, 2).replace(
+		/\{\n\s*([^{},\n]*)\n\s*\}/g,
+		"{ $1 }",
+	);
+}
+
 /** Origin to advertise for API calls. The website host defers to the API host. */
 export function apiOrigin(requestUrl: string): string {
 	const url = new URL(requestUrl);
@@ -21,26 +33,40 @@ export const siteHtml = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>slop.how</title>
-<meta name="description" content="Score text for AI slop.">
+<meta name="description" content="Find the slop before your readers do.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&text=slop.how&display=swap">
 <style>
-:root { color-scheme: light dark; }
+:root { color-scheme: light dark; --slime: light-dark(#3f8f00, #9be22d); }
 body { margin: 0; min-height: 100vh; display: grid; place-items: center; font: 16px/1.5 system-ui, sans-serif; }
-main { max-width: 42rem; padding: 2rem; text-align: center; }
-h1 { font-size: 1.5rem; font-weight: 600; margin: 0 0 0.5rem; }
-p { margin: 0 0 2rem; opacity: 0.7; }
-pre { text-align: left; white-space: pre-wrap; font-size: 0.85rem; padding: 1rem; margin: 0; border: 1px solid color-mix(in srgb, currentColor 20%, transparent); border-radius: 6px; }
-button { margin: 1rem 0 2.5rem; font: inherit; font-size: 0.85rem; padding: 0.25rem 1rem; cursor: pointer; color: inherit; background: none; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); border-radius: 6px; }
-a { color: inherit; opacity: 0.7; }
-a:hover { opacity: 1; }
+main { width: 100%; max-width: 42rem; padding: 3rem 1.5rem; box-sizing: border-box; text-align: center; }
+h1 { font-family: "Rubik Wet Paint", system-ui, sans-serif; font-weight: 400; font-size: 4.5rem; line-height: 1.1; color: var(--slime); margin: 0 0 0.75rem; }
+.tagline { font-size: 1.35rem; margin: 0 0 3rem; }
+.label { font-size: 0.8rem; opacity: 0.6; margin: 0 0 0.5rem; text-align: left; }
+.label code { font-size: inherit; }
+.block { position: relative; text-align: left; margin: 0 0 2.5rem; border-radius: 8px; background: color-mix(in srgb, currentColor 7%, transparent); }
+pre { margin: 0; padding: 1rem 1.25rem; font-size: 0.8rem; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+#prompt { padding-right: 5rem; }
+button { position: absolute; top: 0.6rem; right: 0.6rem; font: inherit; font-size: 0.75rem; padding: 0.2rem 0.75rem; cursor: pointer; color: inherit; background: light-dark(#fff, #222); border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 6px; }
+button:hover { border-color: var(--slime); }
+a { color: inherit; opacity: 0.6; }
+a:hover { opacity: 1; color: var(--slime); }
 </style>
 </head>
 <body>
 <main>
 <h1>slop.how</h1>
-<p>Score text for AI slop. Paste this into your agent:</p>
-<pre id="prompt">${prompt}</pre>
+<p class="tagline">Find the slop before your readers do.</p>
+<p class="label">Paste this into your agent</p>
+<div class="block">
 <button type="button" id="copy">Copy</button>
-<div><a href="${REPO_URL}" aria-label="GitHub repository">${octocat}</a></div>
+<pre id="prompt">${prompt}</pre>
+</div>
+<p class="label">Response from <code>POST ${API_ORIGIN}/v1/analyze</code></p>
+<div class="block">
+<pre id="response">${compactJson(exampleResponse)}</pre>
+</div>
+<a href="${REPO_URL}" aria-label="GitHub repository">${octocat}</a>
 </main>
 <script>
 const copy = document.getElementById("copy");
