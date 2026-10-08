@@ -12,7 +12,7 @@ decision model (`@cf/cloudflare/clef`). It returns a probability per factor.
 It does not try to say whether a human or an AI wrote the text; see "Spike
 findings" for why.
 
-Production: https://slop.how (website) and https://api.slop.how (API), both served by one Worker via custom domains in `cloudflare.config.ts`. Also reachable at https://clef-slop-detector.ziki.workers.dev. No auth yet.
+Production: https://slop.how (website) and https://api.slop.how (API), both served by one Worker via custom domains in `cloudflare.config.ts`. No auth yet.
 
 ## Domain
 
@@ -77,7 +77,8 @@ named "clef-slop-detector GitHub Actions deploy" and is scoped to Workers
 Scripts Write and Account Settings Read on the personal account, plus Zone
 Read, DNS Write, and Workers Routes Write on the slop.how zone (needed for the
 custom domains). The cf OAuth session can create tokens but not update or
-delete them; change permissions by creating a new token and swapping the secret.
+delete them; change permissions by creating a new token, swapping the secret,
+and deleting the old token in the dashboard (Profile > API Tokens).
 
 ## Pricing
 
@@ -101,6 +102,10 @@ about 2,300 tokens, or $0.00055 on `clef`.
 - Auth and rate limiting
 
 ## Gotchas
+
+- Declaring `domains` in `cloudflare.config.ts` disables the workers.dev URL
+  (and preview URLs) unless workers.dev is enabled explicitly. The old
+  clef-slop-detector.ziki.workers.dev URL now returns 404.
 
 - If `cf` commands fail with `[10000] Authentication error` while logged in,
   a stray `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_API_KEY`/`CLOUDFLARE_ACCOUNT_ID`
