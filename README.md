@@ -42,7 +42,7 @@ You get back a probability for each factor, plus usage and cost:
 }
 ```
 
-Add `"model": "clef-flash"` for a faster, cheaper model.
+To use a different model, add `"model": "clef-flash"` or `"model": "jev"`. See the options below.
 
 ## API
 
@@ -54,6 +54,35 @@ The base URL is `https://api.slop.how`. There's no auth for now.
 | GET    | `/v1/factors`   | List the factors, the question asked about each, and how to fix it   |
 | GET    | `/openapi.json` | The full request and response contract                               |
 | GET    | `/llms.txt`     | Instructions for agents, including how to turn scores into feedback  |
+
+`POST /v1/analyze` takes a JSON body with these options:
+
+| Option  | Type   | Required | Description                                                                                         |
+| ------- | ------ | -------- | --------------------------------------------------------------------------------------------------- |
+| `text`  | string | yes      | The text to analyze, up to 500,000 characters. Long text is split into chunks, one model call each. |
+| `model` | string | no       | Which decision model to use: `clef` (default), `clef-flash`, or `jev`.                              |
+
+The models:
+
+| Model        | Description                                                                                                                                | $ per million input tokens |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
+| `clef`       | Default. Cloudflare's 27B decision model. The most precise in testing, with no false positives.                                            | 0.24                       |
+| `clef-flash` | Clef's faster, cheaper 9B sibling. Misses a few more subtle cases.                                                                         | 0.09                       |
+| `jev`        | TypeSafe's Jev, via Cloudflare AI Gateway. About 6x cheaper than `clef` and a bit more sensitive, but flags slightly more false positives. | 0.042                      |
+
+The response has these fields:
+
+| Field                         | Description                                                                 |
+| ----------------------------- | --------------------------------------------------------------------------- |
+| `version`                     | Factor definition version. Scores can change when this changes.             |
+| `model`                       | The model that produced these scores                                        |
+| `factors.<id>.probability`    | 0 to 1, how likely the text shows that factor. One entry per factor.        |
+| `usage.chunks`                | Number of model calls. Long text is split into chunks.                      |
+| `usage.words`                 | Word count of the submitted text                                            |
+| `usage.inputTokens`           | Input tokens billed across all chunks, including the factor questions       |
+| `usage.costUsd`               | Estimated cost of the request in USD                                        |
+
+Errors come back as `{ "error": "...", "issues": [...] }`, with status 400 for an invalid request (with `issues` listing what's wrong) and 502 if the model call fails.
 
 The OpenAPI spec at [api.slop.how/openapi.json](https://api.slop.how/openapi.json) is generated from the Zod schemas in [src/schema.ts](./src/schema.ts), and a copy is committed as [openapi.json](./openapi.json). TypeScript callers can get a typed client from Hono with the exported `AppType`. Other Workers can call `analyze({ text })` directly over a service binding.
 
@@ -67,7 +96,7 @@ A factor is one specific habit that shows up a lot in AI-generated writing: open
 
 When you send text, the API passes it to Clef along with all 14 questions in a single call. Clef returns, for each factor, the probability that the text has it. A 0.95 means Clef is confident the habit is there, and 0.05 means it's confident it isn't. Long text gets split into chunks, and each factor keeps its highest score across chunks. The API returns those probabilities as they are. It doesn't roll them up into a single "slop score," because any weighting would be a number I made up.
 
-The whole thing is meant to be fast and cheap. A 580-word blog post comes back in about a second. Clef charges $0.24 per million input tokens and nothing for output. The 14 questions add about 1,700 tokens to every call, so a 500-word page costs about $0.0005, or about 1,800 checks for a dollar. `clef-flash` costs $0.09 per million tokens.
+The whole thing is meant to be fast and cheap. A 580-word blog post comes back in about a second. Clef charges $0.24 per million input tokens and nothing for output. The 14 questions add about 1,700 tokens to every call, so a 500-word page costs about $0.0005, or about 1,800 checks for a dollar. `clef-flash` costs $0.09 per million tokens, and `jev` costs $0.042.
 
 It doesn't tell you whether a human or an AI wrote something. I tried that first, since this started as a cheaper alternative to [Pangram](https://www.pangram.com) for [zeke/slop-detector](https://github.com/zeke/slop-detector). Clef is good at spotting the clichés but not at judging authorship. Polished AI writing scored as human, and stiff human writing scored as AI. So this API reports the factors and leaves authorship alone.
 

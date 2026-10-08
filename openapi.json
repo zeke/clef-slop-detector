@@ -19,9 +19,10 @@
 						"type": "string",
 						"enum": [
 							"clef",
-							"clef-flash"
+							"clef-flash",
+							"jev"
 						],
-						"description": "Clef variant. clef is the 27B model; clef-flash is the faster, cheaper 9B model."
+						"description": "The model that produced these scores"
 					},
 					"factors": {
 						"type": "object",
@@ -84,7 +85,8 @@
 							"over_structuring",
 							"signposting",
 							"chatbot_artifacts"
-						]
+						],
+						"description": "Probability for every factor, keyed by factor id. See GET /v1/factors for definitions."
 					},
 					"usage": {
 						"$ref": "#/components/schemas/Usage"
@@ -117,19 +119,22 @@
 					"chunks": {
 						"type": "integer",
 						"exclusiveMinimum": 0,
-						"description": "Number of Clef calls. Long text is split into chunks."
+						"description": "Number of model calls. Long text is split into chunks."
 					},
 					"words": {
 						"type": "integer",
-						"minimum": 0
+						"minimum": 0,
+						"description": "Word count of the submitted text"
 					},
 					"inputTokens": {
 						"type": "integer",
-						"minimum": 0
+						"minimum": 0,
+						"description": "Input tokens billed across all chunks, including the factor questions"
 					},
 					"costUsd": {
 						"type": "number",
-						"minimum": 0
+						"minimum": 0,
+						"description": "Estimated cost of this request in USD, from the model's per-token price"
 					}
 				},
 				"required": [
@@ -137,7 +142,8 @@
 					"words",
 					"inputTokens",
 					"costUsd"
-				]
+				],
+				"description": "What the request cost"
 			},
 			"ErrorResponse": {
 				"type": "object",
@@ -161,16 +167,23 @@
 						"type": "string",
 						"maxLength": 500000,
 						"pattern": "\\S",
+						"description": "The text to analyze, up to 500,000 characters. Text over 20,000 words (10,000 on jev) is split into chunks, one model call each.",
 						"example": "In today's fast-paced digital landscape, it's important to note that..."
 					},
 					"model": {
 						"type": "string",
 						"enum": [
 							"clef",
-							"clef-flash"
+							"clef-flash",
+							"jev"
 						],
 						"default": "clef",
-						"description": "Clef variant. clef is the 27B model; clef-flash is the faster, cheaper 9B model."
+						"description": "Which decision model to score with:\n\n- `clef`: Default. Cloudflare's 27B decision model. The most precise in testing, with no false positives.\n- `clef-flash`: Clef's faster, cheaper 9B sibling. Misses a few more subtle cases.\n- `jev`: TypeSafe's Jev, via Cloudflare AI Gateway. About 6x cheaper than clef and a bit more sensitive, but flags slightly more false positives.",
+						"x-enumDescriptions": {
+							"clef": "Default. Cloudflare's 27B decision model. The most precise in testing, with no false positives.",
+							"clef-flash": "Clef's faster, cheaper 9B sibling. Misses a few more subtle cases.",
+							"jev": "TypeSafe's Jev, via Cloudflare AI Gateway. About 6x cheaper than clef and a bit more sensitive, but flags slightly more false positives."
+						}
 					}
 				},
 				"required": [

@@ -1,9 +1,5 @@
-import { chunkText, countWords, MAX_CHUNK_WORDS } from "./chunk.ts";
-import {
-	buildClefRequest,
-	clefPricePerMillionInputTokens,
-	parseClefResponse,
-} from "./clef.ts";
+import { chunkText, countWords } from "./chunk.ts";
+import { buildClefRequest, models, parseClefResponse } from "./clef.ts";
 import { FACTORS_VERSION, factorIds } from "./factors.ts";
 import type { AnalyzeInput, AnalyzeResult } from "./schema.ts";
 
@@ -15,13 +11,15 @@ export interface AiRunner {
 export async function analyze(
 	ai: AiRunner,
 	{ text, model }: AnalyzeInput,
-	{ maxChunkWords = MAX_CHUNK_WORDS } = {},
+	{
+		maxChunkWords = models[model].maxChunkWords,
+	}: { maxChunkWords?: number } = {},
 ): Promise<AnalyzeResult> {
 	const chunks = chunkText(text, maxChunkWords);
 	const responses = await Promise.all(
 		chunks.map(async (chunk) =>
 			parseClefResponse(
-				await ai.run(`@cf/cloudflare/${model}`, {
+				await ai.run(models[model].runId, {
 					...buildClefRequest(chunk, model),
 				}),
 			),
@@ -38,7 +36,7 @@ export async function analyze(
 
 	const inputTokens = responses.reduce((sum, r) => sum + r.inputTokens, 0);
 	const costUsd = round(
-		(inputTokens * clefPricePerMillionInputTokens[model]) / 1_000_000,
+		(inputTokens * models[model].pricePerMillionInputTokens) / 1_000_000,
 	);
 
 	return {

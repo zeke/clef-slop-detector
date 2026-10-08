@@ -30,6 +30,7 @@ describe("GET /llms.txt", () => {
 		expect(body).toMatch(/quote/i);
 		expect(body).toMatch(/revised version/i);
 		expect(body).toMatch(/Don't show the raw JSON/);
+		expect(body).toContain('"model": "jev"');
 	});
 
 	it("links to the API using the request origin", async () => {

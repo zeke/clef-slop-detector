@@ -1,17 +1,43 @@
 import { z } from "zod";
 import { type FactorId, factorIds, factors } from "./factors.ts";
 
-export const clefModels = ["clef", "clef-flash"] as const;
-export type ClefModel = (typeof clefModels)[number];
+/**
+ * Decision models that speak the System One API (state + typed questions in,
+ * probabilities out). Prices are USD per million input tokens; none of them
+ * bill output tokens. Chunk sizes leave headroom under each context window
+ * (Clef 64k tokens, Jev 32k) after the ~1,700 tokens of factor questions.
+ */
+export const models = {
+	clef: {
+		runId: "@cf/cloudflare/clef",
+		pricePerMillionInputTokens: 0.24,
+		maxChunkWords: 20_000,
+		description:
+			"Default. Cloudflare's 27B decision model. The most precise in testing, with no false positives.",
+	},
+	"clef-flash": {
+		runId: "@cf/cloudflare/clef-flash",
+		pricePerMillionInputTokens: 0.09,
+		maxChunkWords: 20_000,
+		description:
+			"Clef's faster, cheaper 9B sibling. Misses a few more subtle cases.",
+	},
+	// TypeSafe's Jev, a third-party model routed through AI Gateway and billed from AI Gateway credits.
+	jev: {
+		runId: "typesafe/jev",
+		pricePerMillionInputTokens: 0.042,
+		maxChunkWords: 10_000,
+		description:
+			"TypeSafe's Jev, via Cloudflare AI Gateway. About 6x cheaper than clef and a bit more sensitive, but flags slightly more false positives.",
+	},
+} as const;
 
-/** USD per million input tokens. Clef doesn't bill output tokens. */
-export const clefPricePerMillionInputTokens: Record<ClefModel, number> = {
-	clef: 0.24,
-	"clef-flash": 0.09,
-};
+export type Model = keyof typeof models;
+export const modelIds = Object.keys(models) as [Model, ...Model[]];
 
 export interface ClefRequest {
-	model: ClefModel;
+	/** Clef's model selector. Jev doesn't take one. */
+	model?: "clef" | "clef-flash";
 	state: string;
 	questions: Record<
 		FactorId,
@@ -23,7 +49,7 @@ export interface ClefRequest {
 	>;
 }
 
-export function buildClefRequest(text: string, model: ClefModel): ClefRequest {
+export function buildClefRequest(text: string, model: Model): ClefRequest {
 	const questions = Object.fromEntries(
 		factorIds.map((id) => [
 			id,
@@ -34,7 +60,9 @@ export function buildClefRequest(text: string, model: ClefModel): ClefRequest {
 			},
 		]),
 	) as ClefRequest["questions"];
-	return { model, state: text, questions };
+	return model === "jev"
+		? { state: text, questions }
+		: { model, state: text, questions };
 }
 
 const NoulAnswer = z.object({
@@ -57,9 +85,16 @@ export interface ParsedClefResponse {
 	inputTokens: number;
 }
 
-/** Validate a raw Clef response and pull out one probability per factor. */
+/** Jev can wrap its answers in a { state, result } envelope. */
+function unwrap(raw: unknown): unknown {
+	if (raw && typeof raw === "object" && "result" in raw && !("answers" in raw))
+		return raw.result;
+	return raw;
+}
+
+/** Validate a raw Clef or Jev response and pull out one probability per factor. */
 export function parseClefResponse(raw: unknown): ParsedClefResponse {
-	const { answers, usage } = ClefResponse.parse(raw);
+	const { answers, usage } = ClefResponse.parse(unwrap(raw));
 	const probabilities = Object.fromEntries(
 		factorIds.map((id) => [id, answers[id].noul]),
 	) as Record<FactorId, number>;
