@@ -60,7 +60,7 @@ Follows "Scripts to Rule Them All". Use these instead of raw npm commands.
 
 ## API
 
-- `POST /v1/analyze` `{ text, model? }` returns `{ version, model, factors: { <id>: { probability } }, usage }`
+- `POST /v1/analyze` `{ text, model? }` returns `{ version, model, factors: { <id>: { probability } }, usage }`, with `factors` keys ordered highest probability first
 - `GET /v1/factors` returns factor definitions
 - `GET /openapi.json`
 - `GET /llms.txt`: agent-facing summary (llmstxt.org format). Includes a review workflow telling agents to give writing feedback (flag factors at 0.5 or higher, quote passages, suggest rewrites, end with a revised text) rather than dump scores. Keep it in sync with API changes; tests check it lists every factor with its advice.

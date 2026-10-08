@@ -27,11 +27,21 @@ export async function analyze(
 	);
 
 	// A factor applies to the document if it applies to any chunk.
+	// Keys are inserted highest probability first; ties keep factor order.
 	const factors = Object.fromEntries(
-		factorIds.map((id) => [
-			id,
-			{ probability: Math.max(...responses.map((r) => r.probabilities[id])) },
-		]),
+		factorIds
+			.map(
+				(id) =>
+					[
+						id,
+						{
+							probability: Math.max(
+								...responses.map((r) => r.probabilities[id]),
+							),
+						},
+					] as const,
+			)
+			.sort(([, a], [, b]) => b.probability - a.probability),
 	) as AnalyzeResult["factors"];
 
 	const inputTokens = responses.reduce((sum, r) => sum + r.inputTokens, 0);

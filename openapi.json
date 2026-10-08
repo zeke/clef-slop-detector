@@ -104,7 +104,7 @@
 							"signposting",
 							"chatbot_artifacts"
 						],
-						"description": "Probability for every factor, keyed by factor id. See GET /v1/factors for definitions."
+						"description": "Probability for every factor, keyed by factor id, highest probability first. See GET /v1/factors for definitions."
 					},
 					"usage": {
 						"$ref": "#/components/schemas/Usage"

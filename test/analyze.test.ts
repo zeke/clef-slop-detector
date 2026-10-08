@@ -23,7 +23,10 @@ describe("analyze", () => {
 		]);
 		expect(result.version).toBe(FACTORS_VERSION);
 		expect(result.model).toBe("clef");
-		expect(Object.keys(result.factors)).toEqual(factorIds);
+		expect(Object.keys(result.factors)).toEqual([
+			"chatbot_artifacts",
+			...factorIds.filter((id) => id !== "chatbot_artifacts"),
+		]);
 		expect(result.factors.chatbot_artifacts).toEqual({ probability: 0.99 });
 		expect(result.factors.hedging).toEqual({ probability: 0.1 });
 		expect(result.usage).toEqual({
