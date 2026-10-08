@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { app } from "../src/app.ts";
+import { factorIds, factors } from "../src/factors.ts";
 import { AnalyzeResponse } from "../src/schema.ts";
 import { fakeAi } from "./helpers.ts";
 
@@ -72,6 +73,19 @@ describe("GET / (website)", () => {
 		expect(json).toBeDefined();
 		const parsed = AnalyzeResponse.parse(JSON.parse(json ?? ""));
 		expect(parsed.factors.canned_opening.probability).toBeGreaterThan(0.7);
+	});
+
+	it("lists every factor as a deep-linkable label and instruction", async () => {
+		const html = await (await get("https://slop.how/")).text();
+		for (const id of factorIds) {
+			const item = html.match(new RegExp(`<li id="${id}">(.*?)</li>`))?.[1];
+			expect(item).toContain(
+				`<a href="#${id}"><strong>${factors[id].label.replace("&", "&amp;")}</strong></a>`,
+			);
+		}
+		expect(html).toContain(
+			"<strong>Negation reframe</strong></a> Does the text set up a contrast",
+		);
 	});
 
 	it("links to the GitHub repo with an Octocat icon", async () => {

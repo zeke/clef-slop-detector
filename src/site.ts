@@ -5,6 +5,18 @@ export const REPO_URL = "https://github.com/zeke/slop.how";
 // A real response for the sample text below, captured from production.
 // Tests validate it against AnalyzeResponse so it can't drift from the schema.
 import exampleResponse from "./example-response.json" with { type: "json" };
+import { factorIds, factors } from "./factors.ts";
+
+const escapeHtml = (s: string) =>
+	s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+
+// Each factor is deep-linkable at #<factor id>, matching the API's keys.
+const factorList = factorIds
+	.map(
+		(id) =>
+			`<li id="${id}"><a href="#${id}"><strong>${escapeHtml(factors[id].label)}</strong></a> ${escapeHtml(factors[id].instructions)}</li>`,
+	)
+	.join("\n");
 
 /** Pretty-print JSON, collapsing single-property objects onto one line. */
 function compactJson(value: unknown): string {
@@ -69,6 +81,11 @@ a { color: inherit; opacity: 0.6; }
 a:hover { opacity: 1; color: var(--slime); }
 .label a { opacity: 1; }
 .corner { position: absolute; top: 1.25rem; right: 1.25rem; }
+.factors { text-align: left; margin: 0 0 2.5rem; padding: 0; list-style: none; }
+.factors li { margin: 0 0 0.5rem; padding: 0.5rem 0.75rem; border-radius: 8px; scroll-margin-top: 1rem; }
+.factors li:target { background: color-mix(in srgb, var(--slime) 15%, transparent); }
+.factors a { opacity: 1; text-decoration: none; color: var(--slime); }
+.factors a:hover { text-decoration: underline; }
 footer { display: flex; justify-content: center; align-items: center; gap: 1.25rem; }
 footer a { position: relative; display: inline-flex; }
 footer a::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 0.5rem); left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 4px; color: light-dark(#fff, #111); background: light-dark(#222, #eee); opacity: 0; pointer-events: none; transition: opacity 0.15s; }
@@ -95,6 +112,10 @@ footer a:hover::after, footer a:focus-visible::after { opacity: 1; }
 <p>Here is a revised version:</p>
 <blockquote>Remote work is here to stay. With good collaboration tools, teams can get more done and try new ideas more easily.</blockquote>
 </div>
+<p class="label">The factors:</p>
+<ul class="factors">
+${factorList}
+</ul>
 <footer>
 <a href="${REPO_URL}#cloudflare" aria-label="Sponsored by Cloudflare" data-tip="Sponsored by Cloudflare">${cloudflareLogo}</a>
 <a href="${REPO_URL}" aria-label="Open Source on GitHub" data-tip="Open Source on GitHub">${octocat}</a>
