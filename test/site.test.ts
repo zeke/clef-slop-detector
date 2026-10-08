@@ -36,9 +36,21 @@ describe("GET / (website)", () => {
 		expect(html).toMatch(/h1 \{[^}]*font-family: "Creepster"/);
 	});
 
+	it("shows an example agent reply after the API response", async () => {
+		const html = await (await get("https://slop.how/")).text();
+		const responseAt = html.indexOf('<pre id="response">');
+		const replyAt = html.indexOf("Your agent checks the scores and responds:");
+		expect(responseAt).toBeGreaterThan(-1);
+		expect(replyAt).toBeGreaterThan(responseAt);
+		expect(html).toContain("The text is built from stock parts");
+		expect(html).toMatch(/<blockquote>\s*Remote work is here to stay\./);
+	});
+
 	it("shows an example API response that matches the response schema", async () => {
 		const html = await (await get("https://slop.how/")).text();
-		expect(html).toContain("POST https://api.slop.how/v1/analyze");
+		expect(html).toMatch(
+			/<a href="https:\/\/api\.slop\.how">api\.slop\.how<\/a> responds with slop score data:/,
+		);
 		const json = html.match(/<pre id="response">([\s\S]*?)<\/pre>/)?.[1];
 		expect(json).toBeDefined();
 		const parsed = AnalyzeResponse.parse(JSON.parse(json ?? ""));
