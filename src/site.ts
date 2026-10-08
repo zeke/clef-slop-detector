@@ -20,7 +20,13 @@ export function apiOrigin(requestUrl: string): string {
 	return url.hostname === SITE_HOST ? API_ORIGIN : url.origin;
 }
 
-const prompt = `Use https://${SITE_HOST}/llms.txt to review this text:
+/** Origin to advertise for the website. Previews and local dev point at themselves. */
+function siteOrigin(requestUrl: string): string {
+	const url = new URL(requestUrl);
+	return url.hostname === SITE_HOST ? `https://${SITE_HOST}` : url.origin;
+}
+
+const prompt = (origin: string) => `Use ${origin}/llms.txt to review this text:
 
 In today's fast-paced digital landscape, remote work isn't just a trend. It's a revolution. By leveraging cutting-edge collaboration tools, teams can unlock unprecedented productivity and foster a culture of innovation. The result? A seamless, empowered workforce. Let's dive in.`;
 
@@ -30,7 +36,10 @@ const octocat = `<svg viewBox="0 0 16 16" width="24" height="24" aria-hidden="tr
 // Cloudflare's cloud glyph, from the "cloudflare" symbol in https://www.cloudflare.com/icons.svg.
 const cloudflareLogo = `<svg viewBox="0 0 341 156" width="44" height="20" aria-hidden="true"><g fill="currentColor"><path d="M275.125 68.25C311.507 68.25 341 97.9335 341 134.55C341 141.077 340.063 147.385 338.317 153.343C337.848 154.943 336.363 156 334.706 156H243.056C241.697 156 240.76 154.628 241.247 153.351L242.999 148.76C248.595 134.03 264.56 121.963 279.331 121.256L307.33 119.813C308.826 119.736 310 118.492 310 116.985C310 115.485 308.838 114.245 307.351 114.157L281.059 112.601C266.924 111.877 260.018 99.2932 263.82 86.179L268.195 71.0866C268.64 69.5514 269.971 68.4343 271.557 68.3476C272.738 68.2831 273.928 68.25 275.125 68.25Z"/><path d="M184.062 0C222 0 253.868 26.1297 262.882 61.4824C263.26 62.967 263.142 64.5333 262.601 65.9662L255.383 85.0897C249.787 99.8196 235.406 112.593 219.134 112.593L93.7928 114.043C92.2801 114.061 91.063 115.3 91.0625 116.823C91.0625 118.344 92.2776 119.585 93.789 119.605L217.365 121.248C231.531 121.248 238.406 134.556 234.606 147.671L233.011 153.189C232.53 154.855 231.014 156 229.291 156H3.90889C1.98075 156 0.330745 154.574 0.17634 152.64C0.0594555 151.175 0 149.695 0 148.2C0 119.723 21.6617 96.3403 49.306 93.8266C48.7387 91.2419 48.4375 88.5564 48.4375 85.8C48.4375 65.3379 64.919 48.75 85.25 48.75C93.3413 48.75 100.822 51.3789 106.897 55.8321C117.716 23.3806 148.176 0 184.062 0Z"/></g></svg>`;
 
-export const siteHtml = `<!doctype html>
+/** The homepage, with links pointed at the host serving it. */
+export function siteHtml(requestUrl: string): string {
+	const api = apiOrigin(requestUrl);
+	return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -74,9 +83,9 @@ footer a:hover::after, footer a:focus-visible::after { opacity: 1; }
 <p class="label">Paste this into your agent</p>
 <div class="block">
 <button type="button" id="copy">Copy</button>
-<pre id="prompt">${prompt}</pre>
+<pre id="prompt">${prompt(siteOrigin(requestUrl))}</pre>
 </div>
-<p class="label"><a href="${API_ORIGIN}">api.slop.how</a> responds with slop score data:</p>
+<p class="label"><a href="${api}">${new URL(api).host}</a> responds with slop score data:</p>
 <div class="block">
 <pre id="response">${compactJson(exampleResponse)}</pre>
 </div>
@@ -102,3 +111,4 @@ copy.addEventListener("click", async () => {
 </body>
 </html>
 `;
+}

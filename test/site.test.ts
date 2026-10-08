@@ -27,6 +27,17 @@ describe("GET / (website)", () => {
 			"Use https://slop.how/llms.txt to review this text:",
 		);
 		expect(html).toContain("In today's fast-paced digital landscape");
+		expect(html).toContain('<a href="https://api.slop.how">api.slop.how</a>');
+	});
+
+	it("points the prompt and API link at the serving host on previews", async () => {
+		const origin = "https://pr-12-clef-slop-detector.ziki.workers.dev";
+		const html = await (await get(`${origin}/`)).text();
+		expect(html).toContain(`Use ${origin}/llms.txt to review this text:`);
+		expect(html).toContain(
+			`<a href="${origin}">pr-12-clef-slop-detector.ziki.workers.dev</a>`,
+		);
+		expect(html).not.toContain("https://slop.how/llms.txt");
 	});
 
 	it("puts the copy button inside the prompt block", async () => {
