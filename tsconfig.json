@@ -15,7 +15,6 @@
 	"include": [
 		"src",
 		"test",
-		"script",
 		"cloudflare.config.ts",
 		"vite.config.ts",
 		"vitest.config.ts",

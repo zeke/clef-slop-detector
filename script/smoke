@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Regression check against a live deployment with real Clef calls. See script/smoke.ts.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+node script/smoke.ts "$@"

@@ -4,3 +4,4 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 npx cf workers types >/dev/null
 npx tsc
+npx tsc -p tsconfig.node.json
