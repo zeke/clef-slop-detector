@@ -86,9 +86,11 @@ describe("OpenAPI", () => {
 		expect(res.status).toBe(200);
 		const doc = (await res.json()) as {
 			openapi: string;
+			info: { title: string };
 			paths: Record<string, unknown>;
 		};
 		expect(doc.openapi).toMatch(/^3\.1/);
+		expect(doc.info.title).toBe("slop.how");
 		expect(Object.keys(doc.paths)).toEqual(
 			expect.arrayContaining(["/v1/analyze", "/v1/factors"]),
 		);

@@ -104,6 +104,8 @@ about 2,300 tokens, or $0.00055 on `clef`.
 
 ## Gotchas
 
+- The repo was renamed from `zeke/clef-slop-detector` to `zeke/slop.how` (GitHub redirects the old URL). The Worker is still named `clef-slop-detector` in `cloudflare.config.ts` on purpose: renaming it would create a new Worker, move the custom domains, and orphan the old one, for no user-visible benefit.
+
 - Declaring `domains` in `cloudflare.config.ts` disables the workers.dev URL
   (and preview URLs) unless workers.dev is enabled explicitly. The old
   clef-slop-detector.ziki.workers.dev URL now returns 404.

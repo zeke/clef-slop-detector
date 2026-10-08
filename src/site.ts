@@ -1,6 +1,6 @@
 export const SITE_HOST = "slop.how";
 export const API_ORIGIN = "https://api.slop.how";
-const REPO_URL = "https://github.com/zeke/clef-slop-detector";
+const REPO_URL = "https://github.com/zeke/slop.how";
 
 // A real response for the sample text below, captured from production.
 // Tests validate it against AnalyzeResponse so it can't drift from the schema.

@@ -1,7 +1,7 @@
 {
 	"openapi": "3.1.0",
 	"info": {
-		"title": "clef-slop-detector",
+		"title": "slop.how",
 		"version": "2026-10-07",
 		"description": "Scores text against slop factors using Cloudflare's Clef decision model."
 	},

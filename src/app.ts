@@ -74,7 +74,7 @@ export const app = new OpenAPIHono<{ Bindings: Bindings }>({
 const openApiConfig = {
 	openapi: "3.1.0",
 	info: {
-		title: "clef-slop-detector",
+		title: "slop.how",
 		version: FACTORS_VERSION,
 		description:
 			"Scores text against slop factors using Cloudflare's Clef decision model.",
