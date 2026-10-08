@@ -100,4 +100,15 @@ The whole thing is meant to be fast and cheap. A 580-word blog post comes back i
 
 It doesn't tell you whether a human or an AI wrote something. I tried that first, since this started as a cheaper alternative to [Pangram](https://www.pangram.com) for [zeke/slop-detector](https://github.com/zeke/slop-detector). Clef is good at spotting the clichés but not at judging authorship. Polished AI writing scored as human, and stiff human writing scored as AI. So this API reports the factors and leaves authorship alone.
 
+## Cloudflare
+
+slop.how is sponsored by Cloudflare and built entirely on Cloudflare:
+
+- [Workers](https://developers.cloudflare.com/workers/) runs the API and the website, from one Worker
+- [Workers AI](https://developers.cloudflare.com/workers-ai/) runs the `clef` and `clef-flash` decision models
+- [AI Gateway](https://developers.cloudflare.com/ai-gateway/) routes calls to TypeSafe's `jev` model and bills them through Unified Billing
+- [Custom Domains](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) serve the Worker on slop.how and api.slop.how
+- [Registrar](https://developers.cloudflare.com/registrar/) and [DNS](https://developers.cloudflare.com/dns/) handle the slop.how domain
+- The [`cf` CLI](https://developers.cloudflare.com/cf/) handles local dev and deploys
+
 See [AGENTS.md](./AGENTS.md) for development details.

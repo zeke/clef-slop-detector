@@ -1,6 +1,7 @@
 {
 	"name": "slop.how",
 	"private": true,
+	"license": "MIT",
 	"type": "module",
 	"scripts": {
 		"dev": "cf dev",
