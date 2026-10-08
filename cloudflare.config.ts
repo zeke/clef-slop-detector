@@ -6,6 +6,7 @@ export default defineConfig({
 		name: "clef-slop-detector",
 		compatibilityDate: "2026-10-01",
 		entrypoint,
+		domains: ["slop.how", "api.slop.how"],
 		env: {
 			AI: bindings.ai({ dev: { remote: true } }),
 		},

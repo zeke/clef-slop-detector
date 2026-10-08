@@ -9,8 +9,7 @@ import { hc } from "hono/client";
 import type { AppType } from "../src/app.ts";
 import type { FactorId } from "../src/factors.ts";
 
-const baseUrl =
-	process.argv[2] ?? "https://clef-slop-detector.ziki.workers.dev";
+const baseUrl = process.argv[2] ?? "https://api.slop.how";
 const client = hc<AppType>(baseUrl);
 
 interface Sample {
