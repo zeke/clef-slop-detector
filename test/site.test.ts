@@ -13,6 +13,12 @@ describe("GET / (website)", () => {
 		const html = await res.text();
 		expect(html).toMatch(/^<!doctype html>/i);
 		expect(html).toContain("<title>slop.how</title>");
+		expect(html).toContain(
+			'<p class="tagline">A fast and free API for detecting sloppy text</p>',
+		);
+		expect(html).toContain(
+			'<meta name="description" content="A fast and free API for detecting sloppy text">',
+		);
 	});
 
 	it("includes a copy-paste agent prompt pointing at llms.txt", async () => {

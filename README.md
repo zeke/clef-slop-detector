@@ -1,6 +1,8 @@
 # slop.how
 
-An HTTP API that scores text for "slop": the stylistic tells that show up in a lot of AI-generated writing, like canned openings, negation reframes ("It's not X, it's Y"), buzzwords, and chatbot residue. It lives at [slop.how](https://slop.how).
+A fast and free API for detecting sloppy text
+
+It scores text for "slop": the stylistic tells that show up in a lot of AI-generated writing, like canned openings, negation reframes ("It's not X, it's Y"), buzzwords, and chatbot residue. It lives at [slop.how](https://slop.how).
 
 Paste this into your coding agent:
 
