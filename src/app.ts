@@ -2,6 +2,7 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { type AiRunner, analyze } from "./analyze.ts";
 import { FACTORS_VERSION, factorIds, factors } from "./factors.ts";
+import { llmsTxt } from "./llms.ts";
 import {
 	AnalyzeRequest,
 	AnalyzeResponse,
@@ -83,6 +84,11 @@ export const openApiDocument = () => app.getOpenAPI31Document(openApiConfig);
 
 app.doc31("/openapi.json", openApiConfig);
 app.get("/", (c) => c.redirect("/openapi.json"));
+app.get("/llms.txt", (c) =>
+	c.body(llmsTxt(new URL(c.req.url).origin), 200, {
+		"content-type": "text/markdown; charset=utf-8",
+	}),
+);
 
 app.onError((err, c) => {
 	if (err instanceof HTTPException)
