@@ -32,8 +32,8 @@ describe("GET / (website)", () => {
 
 	it("uses a drippy display font for the heading", async () => {
 		const html = await (await get("https://slop.how/")).text();
-		expect(html).toContain("family=Rubik+Wet+Paint");
-		expect(html).toMatch(/h1 \{[^}]*font-family: "Rubik Wet Paint"/);
+		expect(html).toContain("family=Creepster");
+		expect(html).toMatch(/h1 \{[^}]*font-family: "Creepster"/);
 	});
 
 	it("shows an example API response that matches the response schema", async () => {

@@ -37,7 +37,7 @@ Production: https://slop.how (website) and https://api.slop.how (API), both serv
 - `src/analyze.ts`: core: chunk, call Clef per chunk in parallel, take max probability per factor, sum usage
 - `src/schema.ts`: public API schemas (`AnalyzeRequest`, `AnalyzeResponse`, `FactorsResponse`, `ErrorResponse`)
 - `src/llms.ts`: generates `/llms.txt` from the factor definitions, with links built from the request origin
-- `src/site.ts`: the slop.how homepage (one inline HTML page: slime heading in Rubik Wet Paint from Google Fonts, subset with `text=slop.how`; copy-paste agent prompt; example API response) and `apiOrigin()`, which makes `/llms.txt` on slop.how link to api.slop.how
+- `src/site.ts`: the slop.how homepage (one inline HTML page: slime heading in Creepster from Google Fonts, subset with `text=slop.how`; copy-paste agent prompt; example API response) and `apiOrigin()`, which makes `/llms.txt` on slop.how link to api.slop.how
 - `src/example-response.json`: a real production response for the homepage's sample text. A test validates it against `AnalyzeResponse`. Recapture it (POST the sample text to api.slop.how) when factors or the response shape change.
 - `src/app.ts`: Hono app, routes, OpenAPI document. Exports `AppType` for `hc<AppType>` typed clients.
 - `src/index.ts`: Worker entrypoint. `fetch` delegates to the Hono app; `analyze()` is a JS RPC method for service bindings. Only file that imports `cloudflare:workers`.

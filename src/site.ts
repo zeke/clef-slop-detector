@@ -35,18 +35,19 @@ export const siteHtml = `<!doctype html>
 <title>slop.how</title>
 <meta name="description" content="Find the slop before your readers do.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&text=slop.how&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Creepster&text=slop.how&display=swap">
 <style>
 :root { color-scheme: light dark; --slime: light-dark(#3f8f00, #9be22d); }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; font: 16px/1.5 system-ui, sans-serif; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; grid-template-columns: minmax(0, 1fr); font: 16px/1.5 system-ui, sans-serif; }
 main { width: 100%; max-width: 42rem; padding: 3rem 1.5rem; box-sizing: border-box; text-align: center; }
-h1 { font-family: "Rubik Wet Paint", system-ui, sans-serif; font-weight: 400; font-size: 4.5rem; line-height: 1.1; color: var(--slime); margin: 0 0 0.75rem; }
-.tagline { font-size: 1.35rem; margin: 0 0 3rem; }
+h1 { font-family: "Creepster", system-ui, sans-serif; font-weight: 400; font-size: 5.5rem; line-height: 1; color: var(--slime); margin: 0 0 0.75rem; }
+.tagline { font-size: 1.35rem; margin: 0 0 3rem; text-wrap: balance; }
 .label { font-size: 0.8rem; opacity: 0.6; margin: 0 0 0.5rem; text-align: left; }
 .label code { font-size: inherit; }
 .block { position: relative; text-align: left; margin: 0 0 2.5rem; border-radius: 8px; background: color-mix(in srgb, currentColor 7%, transparent); }
 pre { margin: 0; padding: 1rem 1.25rem; font-size: 0.8rem; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
 #prompt { padding-right: 5rem; }
+#response { white-space: pre; overflow-x: auto; }
 button { position: absolute; top: 0.6rem; right: 0.6rem; font: inherit; font-size: 0.75rem; padding: 0.2rem 0.75rem; cursor: pointer; color: inherit; background: light-dark(#fff, #222); border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 6px; }
 button:hover { border-color: var(--slime); }
 a { color: inherit; opacity: 0.6; }
