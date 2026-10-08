@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { clefModels } from "./clef.ts";
+import { modelIds } from "./clef.ts";
 import { FACTORS_VERSION, type FactorId, factorIds } from "./factors.ts";
 
 /** Hard cap on request size (~90k words, at most 5 Clef calls) since the API is unauthenticated. */
@@ -7,9 +7,9 @@ export const MAX_TEXT_CHARS = 500_000;
 
 const Probability = z.number().min(0).max(1);
 
-export const Model = z.enum(clefModels).openapi({
+export const Model = z.enum(modelIds).openapi({
 	description:
-		"Clef variant. clef is the 27B model; clef-flash is the faster, cheaper 9B model.",
+		"Decision model. clef (default) is Cloudflare's 27B model and the most precise; clef-flash is its faster, cheaper 9B sibling; jev is TypeSafe's model via AI Gateway: cheapest and a bit more sensitive, with slightly more false positives.",
 });
 
 export const AnalyzeRequest = z

@@ -32,7 +32,7 @@ Production: https://slop.how (website) and https://api.slop.how (API), both serv
 ## Layout
 
 - `src/factors.ts`: factor definitions. `instructions` and `criteria` are the Clef questions; bump `FACTORS_VERSION` whenever they change. `advice` is how to fix the problem; it's shown to agents in llms.txt and `/v1/factors` but never sent to Clef, so changing it doesn't need a version bump.
-- `src/clef.ts`: builds Clef requests, validates Clef responses with Zod, model prices
+- `src/clef.ts`: the `models` table (clef, clef-flash, jev), builds System One requests, validates responses with Zod (unwrapping Jev's envelope)
 - `src/chunk.ts`: lossless sentence-aligned chunking for long text
 - `src/analyze.ts`: core: chunk, call Clef per chunk in parallel, take max probability per factor, sum usage
 - `src/schema.ts`: public API schemas (`AnalyzeRequest`, `AnalyzeResponse`, `FactorsResponse`, `ErrorResponse`)
@@ -81,11 +81,25 @@ custom domains). The cf OAuth session can create tokens but not update or
 delete them; change permissions by creating a new token, swapping the secret,
 and deleting the old token in the dashboard (Profile > API Tokens).
 
-## Pricing
+## Models
 
-Clef bills input tokens only: $0.24/M for `clef`, $0.09/M for `clef-flash`. The
-14 factor questions add about 1,700 tokens to every call. A 500-word page costs
-about 2,300 tokens, or $0.00055 on `clef`.
+Defined in `src/clef.ts` (`models`): run ID, price, and max chunk size per model.
+
+| Model        | Run ID                      | $/M input | Context | Max chunk words |
+| ------------ | --------------------------- | --------- | ------- | --------------- |
+| `clef`       | `@cf/cloudflare/clef`       | 0.24      | 64k     | 20,000          |
+| `clef-flash` | `@cf/cloudflare/clef-flash` | 0.09      | 64k     | 20,000          |
+| `jev`        | `typesafe/jev`              | 0.042     | 32k     | 10,000          |
+
+None bill output tokens. The 14 factor questions add about 1,700 tokens per call
+(about 1,450 on Jev, which tokenizes differently). A 500-word page costs about
+$0.00055 on `clef`.
+
+Jev is TypeSafe's model, a third-party model routed through AI Gateway and
+billed from AI Gateway credits (Unified Billing), not Workers AI. It speaks the
+same System One API as Clef but takes no `model` field, may wrap its response
+in `{ state, result }` (`parseClefResponse` unwraps it), and rounds
+probabilities to 2 decimals.
 
 ## Spike findings (2026-10-07)
 
@@ -93,6 +107,24 @@ about 2,300 tokens, or $0.00055 on `clef`.
 - Clef can't count. A page with 14 em dashes in 527 words scored 0.35 on an em dash question. `em_dash_overuse` was dropped for this reason, and `uniform_rhythm` was dropped because it scored 0.4 to 0.6 on nearly everything.
 - Provenance (human vs AI) doesn't work zero-shot. Two pages Pangram flagged at 1.0 AI scored 0.10 to 0.36 with three different prompt phrasings, while a stiff human-style paragraph scored 0.80+. Clef detects cliché style, not authorship.
 - Numbered segments in one Clef call with one question per segment work: Clef keeps them apart, and it's cheaper than one call per segment.
+
+## Jev spike findings (2026-10-08)
+
+Ran 52 docs × clef, clef-flash, jev (156 calls, about $0.035). Positives were LLM-written samples
+targeting each factor (blatant and subtle); negatives were Zeke's human pages plus
+"tricky" legitimate writing (real contrasts, real lists of three, warranted hedges,
+technical uses of "robust"/"leverage").
+
+| Model      | Recall at 0.5 | False positives at 0.5 | Median REST latency | $/1k calls |
+| ---------- | ------------- | ---------------------- | ------------------- | ---------- |
+| clef       | 32/37         | 0/252                  | 0.7 to 1.1 s        | 0.42       |
+| clef-flash | 29/37         | 0/252                  | 0.4 to 0.9 s        | 0.16       |
+| jev        | 33/37         | 3/252                  | about 0.55 s        | 0.06       |
+
+Jev is more sensitive (it caught real negation reframes on Pangram-flagged AI pages
+that Clef missed) but ignored the "precise technical term" criterion for buzzwords
+and flagged a legitimate contrast. Clef stayed the default for precision; jev is opt-in.
+All three miss single mild instances of rhetorical_qa, reflexive_triplets, and signposting.
 
 ## Future ideas
 

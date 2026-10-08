@@ -25,6 +25,12 @@ describe("AnalyzeRequest", () => {
 		).toBe(false);
 	});
 
+	it("accepts jev", () => {
+		expect(AnalyzeRequest.parse({ text: "Hi.", model: "jev" }).model).toBe(
+			"jev",
+		);
+	});
+
 	it("rejects unknown models", () => {
 		expect(
 			AnalyzeRequest.safeParse({ text: "Hi.", model: "gpt-5" }).success,
@@ -36,11 +42,11 @@ describe("types", () => {
 	it("request input has optional model, output has required model", () => {
 		expectTypeOf<z.input<typeof AnalyzeRequest>>().toEqualTypeOf<{
 			text: string;
-			model?: "clef" | "clef-flash" | undefined;
+			model?: "clef" | "clef-flash" | "jev" | undefined;
 		}>();
 		expectTypeOf<z.output<typeof AnalyzeRequest>>().toEqualTypeOf<{
 			text: string;
-			model: "clef" | "clef-flash";
+			model: "clef" | "clef-flash" | "jev";
 		}>();
 	});
 

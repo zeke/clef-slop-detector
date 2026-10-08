@@ -13,7 +13,7 @@ describe("Worker entrypoint types", () => {
 	it("exposes a typed analyze() RPC method", () => {
 		expectTypeOf<SlopDetector["analyze"]>().parameter(0).toEqualTypeOf<{
 			text: string;
-			model?: "clef" | "clef-flash" | undefined;
+			model?: "clef" | "clef-flash" | "jev" | undefined;
 		}>();
 		expectTypeOf<
 			SlopDetector["analyze"]

@@ -19,9 +19,10 @@
 						"type": "string",
 						"enum": [
 							"clef",
-							"clef-flash"
+							"clef-flash",
+							"jev"
 						],
-						"description": "Clef variant. clef is the 27B model; clef-flash is the faster, cheaper 9B model."
+						"description": "Decision model. clef (default) is Cloudflare's 27B model and the most precise; clef-flash is its faster, cheaper 9B sibling; jev is TypeSafe's model via AI Gateway: cheapest and a bit more sensitive, with slightly more false positives."
 					},
 					"factors": {
 						"type": "object",
@@ -167,10 +168,11 @@
 						"type": "string",
 						"enum": [
 							"clef",
-							"clef-flash"
+							"clef-flash",
+							"jev"
 						],
 						"default": "clef",
-						"description": "Clef variant. clef is the 27B model; clef-flash is the faster, cheaper 9B model."
+						"description": "Decision model. clef (default) is Cloudflare's 27B model and the most precise; clef-flash is its faster, cheaper 9B sibling; jev is TypeSafe's model via AI Gateway: cheapest and a bit more sensitive, with slightly more false positives."
 					}
 				},
 				"required": [

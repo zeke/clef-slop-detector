@@ -44,6 +44,17 @@ describe("analyze", () => {
 		expect(result.usage.costUsd).toBe(0.09);
 	});
 
+	it("uses the Jev model id, price, and smaller chunks", async () => {
+		const ai = fakeAi(undefined, () => 1_000_000);
+		const text = Array.from({ length: 15_000 }, () => "word.").join(" ");
+		const result = await analyze(ai, { text, model: "jev" });
+		expect(ai.calls[0]?.model).toBe("typesafe/jev");
+		expect(ai.calls[0]?.inputs).not.toHaveProperty("model");
+		expect(ai.calls).toHaveLength(2);
+		expect(result.model).toBe("jev");
+		expect(result.usage.costUsd).toBe(0.084);
+	});
+
 	it("splits long text into chunks, takes the max probability per factor, and sums usage", async () => {
 		const ai = fakeAi(
 			(id, state) =>

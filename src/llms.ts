@@ -7,7 +7,7 @@ export function llmsTxt(origin: string): string {
 
 > HTTP API that scores text against ${factorIds.length} "slop factors" (stylistic tells common in AI-generated prose) using Cloudflare's Clef decision model. It returns a probability from 0 to 1 for each factor. It does not detect whether a human or an AI wrote the text.
 
-To analyze text, send POST ${origin}/v1/analyze with a JSON body like \`{"text": "..."}\`. No auth. Text can be up to ${MAX_TEXT_CHARS.toLocaleString("en-US")} characters. Add \`"model": "clef-flash"\` for a faster, cheaper, less precise model.
+To analyze text, send POST ${origin}/v1/analyze with a JSON body like \`{"text": "..."}\`. No auth. Text can be up to ${MAX_TEXT_CHARS.toLocaleString("en-US")} characters. Add \`"model": "clef-flash"\` for a faster, cheaper, less precise model, or \`"model": "jev"\` to use TypeSafe's Jev, which is the cheapest and a bit more sensitive but flags slightly more false positives.
 
 \`\`\`sh
 curl -s ${origin}/v1/analyze -H 'content-type: application/json' -d '{"text": "Great question! Let'\\''s dive in."}'

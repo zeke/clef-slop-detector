@@ -42,7 +42,13 @@ You get back a probability for each factor, plus usage and cost:
 }
 ```
 
-Add `"model": "clef-flash"` for a faster, cheaper model.
+You can pick the model with `"model"`:
+
+| Model                | Notes                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------- |
+| `clef` (default)     | Cloudflare's 27B decision model. The most precise in testing, with no false positives.          |
+| `clef-flash`         | Clef's faster, cheaper 9B sibling. Misses a few more subtle cases.                              |
+| `jev`                | TypeSafe's Jev, via Cloudflare AI Gateway. About 6x cheaper than `clef` and a bit more sensitive, but it flags slightly more false positives. |
 
 ## API
 
@@ -67,7 +73,7 @@ A factor is one specific habit that shows up a lot in AI-generated writing: open
 
 When you send text, the API passes it to Clef along with all 14 questions in a single call. Clef returns, for each factor, the probability that the text has it. A 0.95 means Clef is confident the habit is there, and 0.05 means it's confident it isn't. Long text gets split into chunks, and each factor keeps its highest score across chunks. The API returns those probabilities as they are. It doesn't roll them up into a single "slop score," because any weighting would be a number I made up.
 
-The whole thing is meant to be fast and cheap. A 580-word blog post comes back in about a second. Clef charges $0.24 per million input tokens and nothing for output. The 14 questions add about 1,700 tokens to every call, so a 500-word page costs about $0.0005, or about 1,800 checks for a dollar. `clef-flash` costs $0.09 per million tokens.
+The whole thing is meant to be fast and cheap. A 580-word blog post comes back in about a second. Clef charges $0.24 per million input tokens and nothing for output. The 14 questions add about 1,700 tokens to every call, so a 500-word page costs about $0.0005, or about 1,800 checks for a dollar. `clef-flash` costs $0.09 per million tokens, and `jev` costs $0.042.
 
 It doesn't tell you whether a human or an AI wrote something. I tried that first, since this started as a cheaper alternative to [Pangram](https://www.pangram.com) for [zeke/slop-detector](https://github.com/zeke/slop-detector). Clef is good at spotting the clichés but not at judging authorship. Polished AI writing scored as human, and stiff human writing scored as AI. So this API reports the factors and leaves authorship alone.
 

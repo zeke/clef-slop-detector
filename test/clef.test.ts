@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildClefRequest, parseClefResponse } from "../src/clef.ts";
+import { buildClefRequest, models, parseClefResponse } from "../src/clef.ts";
 import { factorIds, factors } from "../src/factors.ts";
 import kitchenSink from "./fixtures/clef-kitchen-sink.json" with {
 	type: "json",
@@ -21,6 +21,33 @@ describe("buildClefRequest", () => {
 	it("passes the model selector through", () => {
 		expect(buildClefRequest("x", "clef-flash").model).toBe("clef-flash");
 	});
+
+	it("omits the model selector for Jev, which doesn't accept one", () => {
+		const req = buildClefRequest("x", "jev");
+		expect(req).not.toHaveProperty("model");
+		expect(Object.keys(req.questions)).toEqual(factorIds);
+	});
+});
+
+describe("models", () => {
+	it("maps each model to its Workers AI id, price, and chunk size", () => {
+		expect(models.clef).toEqual({
+			runId: "@cf/cloudflare/clef",
+			pricePerMillionInputTokens: 0.24,
+			maxChunkWords: 20_000,
+		});
+		expect(models["clef-flash"]).toEqual({
+			runId: "@cf/cloudflare/clef-flash",
+			pricePerMillionInputTokens: 0.09,
+			maxChunkWords: 20_000,
+		});
+		// Jev's context window is 32k tokens, half of Clef's 64k.
+		expect(models.jev).toEqual({
+			runId: "typesafe/jev",
+			pricePerMillionInputTokens: 0.042,
+			maxChunkWords: 10_000,
+		});
+	});
 });
 
 describe("parseClefResponse", () => {
@@ -32,6 +59,15 @@ describe("parseClefResponse", () => {
 		);
 		expect(parsed.probabilities.canned_opening).toBe(0.9637);
 		expect(parsed.probabilities.chatbot_artifacts).toBeLessThan(0.1);
+	});
+
+	it("unwraps Jev's {state, result} envelope", () => {
+		const parsed = parseClefResponse({
+			state: "Completed",
+			result: kitchenSink,
+		});
+		expect(parsed.probabilities.canned_opening).toBe(0.9637);
+		expect(parsed.inputTokens).toBe(2114);
 	});
 
 	it("rejects a response missing a factor", () => {
