@@ -63,7 +63,7 @@ Follows "Scripts to Rule Them All". Use these instead of raw npm commands.
 - `GET /v1/factors` returns factor definitions
 - `GET /openapi.json`
 - `GET /llms.txt`: agent-facing summary (llmstxt.org format). Includes a review workflow telling agents to give writing feedback (flag factors at 0.5 or higher, quote passages, suggest rewrites, end with a revised text) rather than dump scores. Keep it in sync with API changes; tests check it lists every factor with its advice.
-- `GET /` serves the homepage on every host
+- `GET /` redirects (302) to `/openapi.json` on api.slop.how and serves the homepage on every other host, including localhost
 
 Text over 20,000 words is split into chunks at sentence boundaries, one Clef
 call per chunk. Each factor's document probability is the max across chunks.

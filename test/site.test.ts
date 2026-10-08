@@ -70,8 +70,14 @@ describe("GET / (website)", () => {
 		);
 	});
 
-	it("is served on the API host too", async () => {
+	it("redirects the API host to the OpenAPI document", async () => {
 		const res = await get("https://api.slop.how/");
+		expect(res.status).toBe(302);
+		expect(res.headers.get("location")).toBe("/openapi.json");
+	});
+
+	it("is served on local dev hosts", async () => {
+		const res = await get("http://localhost:5190/");
 		expect(res.status).toBe(200);
 		expect(res.headers.get("content-type")).toMatch(/^text\/html/);
 	});

@@ -2,8 +2,26 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "slop.how",
+		"summary": "A fast and free API for detecting sloppy text",
 		"version": "2026-10-07",
-		"description": "Scores text against slop factors using Cloudflare's Clef decision model."
+		"description": "Scores text against slop factors (stylistic tells common in AI-generated prose) using Cloudflare's Clef decision model. Returns a probability per factor. It does not judge whether a human or an AI wrote the text. Agent instructions: https://slop.how/llms.txt",
+		"contact": {
+			"name": "slop.how on GitHub",
+			"url": "https://github.com/zeke/slop.how"
+		},
+		"license": {
+			"name": "MIT",
+			"identifier": "MIT"
+		}
+	},
+	"servers": [
+		{
+			"url": "https://api.slop.how"
+		}
+	],
+	"externalDocs": {
+		"description": "Source code and README",
+		"url": "https://github.com/zeke/slop.how"
 	},
 	"components": {
 		"schemas": {

@@ -9,7 +9,13 @@ import {
 	ErrorResponse,
 	FactorsResponse,
 } from "./schema.ts";
-import { apiOrigin, siteHtml } from "./site.ts";
+import {
+	API_ORIGIN,
+	apiOrigin,
+	REPO_URL,
+	SITE_HOST,
+	siteHtml,
+} from "./site.ts";
 
 export interface Bindings {
 	AI: AiRunner;
@@ -75,16 +81,25 @@ const openApiConfig = {
 	openapi: "3.1.0",
 	info: {
 		title: "slop.how",
+		summary: "A fast and free API for detecting sloppy text",
 		version: FACTORS_VERSION,
-		description:
-			"Scores text against slop factors using Cloudflare's Clef decision model.",
+		description: `Scores text against slop factors (stylistic tells common in AI-generated prose) using Cloudflare's Clef decision model. Returns a probability per factor. It does not judge whether a human or an AI wrote the text. Agent instructions: https://${SITE_HOST}/llms.txt`,
+		contact: { name: "slop.how on GitHub", url: REPO_URL },
+		license: { name: "MIT", identifier: "MIT" },
 	},
+	servers: [{ url: API_ORIGIN }],
+	externalDocs: { description: "Source code and README", url: REPO_URL },
 };
 
 export const openApiDocument = () => app.getOpenAPI31Document(openApiConfig);
 
 app.doc31("/openapi.json", openApiConfig);
-app.get("/", (c) => c.html(siteHtml));
+// The API host has no homepage of its own, so send visitors to the spec.
+app.get("/", (c) =>
+	new URL(c.req.url).hostname === new URL(API_ORIGIN).hostname
+		? c.redirect("/openapi.json")
+		: c.html(siteHtml),
+);
 app.get("/llms.txt", (c) =>
 	c.body(llmsTxt(apiOrigin(c.req.url)), 200, {
 		"content-type": "text/markdown; charset=utf-8",
