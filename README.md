@@ -42,13 +42,7 @@ You get back a probability for each factor, plus usage and cost:
 }
 ```
 
-You can pick the model with `"model"`:
-
-| Model                | Notes                                                                                           |
-| -------------------- | ----------------------------------------------------------------------------------------------- |
-| `clef` (default)     | Cloudflare's 27B decision model. The most precise in testing, with no false positives.          |
-| `clef-flash`         | Clef's faster, cheaper 9B sibling. Misses a few more subtle cases.                              |
-| `jev`                | TypeSafe's Jev, via Cloudflare AI Gateway. About 6x cheaper than `clef` and a bit more sensitive, but it flags slightly more false positives. |
+To use a different model, add `"model": "clef-flash"` or `"model": "jev"`. See the options below.
 
 ## API
 
@@ -60,6 +54,35 @@ The base URL is `https://api.slop.how`. There's no auth for now.
 | GET    | `/v1/factors`   | List the factors, the question asked about each, and how to fix it   |
 | GET    | `/openapi.json` | The full request and response contract                               |
 | GET    | `/llms.txt`     | Instructions for agents, including how to turn scores into feedback  |
+
+`POST /v1/analyze` takes a JSON body with these options:
+
+| Option  | Type   | Required | Description                                                                                         |
+| ------- | ------ | -------- | --------------------------------------------------------------------------------------------------- |
+| `text`  | string | yes      | The text to analyze, up to 500,000 characters. Long text is split into chunks, one model call each. |
+| `model` | string | no       | Which decision model to use: `clef` (default), `clef-flash`, or `jev`.                              |
+
+The models:
+
+| Model        | Description                                                                                                                                | $ per million input tokens |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
+| `clef`       | Default. Cloudflare's 27B decision model. The most precise in testing, with no false positives.                                            | 0.24                       |
+| `clef-flash` | Clef's faster, cheaper 9B sibling. Misses a few more subtle cases.                                                                         | 0.09                       |
+| `jev`        | TypeSafe's Jev, via Cloudflare AI Gateway. About 6x cheaper than `clef` and a bit more sensitive, but flags slightly more false positives. | 0.042                      |
+
+The response has these fields:
+
+| Field                         | Description                                                                 |
+| ----------------------------- | --------------------------------------------------------------------------- |
+| `version`                     | Factor definition version. Scores can change when this changes.             |
+| `model`                       | The model that produced these scores                                        |
+| `factors.<id>.probability`    | 0 to 1, how likely the text shows that factor. One entry per factor.        |
+| `usage.chunks`                | Number of model calls. Long text is split into chunks.                      |
+| `usage.words`                 | Word count of the submitted text                                            |
+| `usage.inputTokens`           | Input tokens billed across all chunks, including the factor questions       |
+| `usage.costUsd`               | Estimated cost of the request in USD                                        |
+
+Errors come back as `{ "error": "...", "issues": [...] }`, with status 400 for an invalid request (with `issues` listing what's wrong) and 502 if the model call fails.
 
 The OpenAPI spec at [api.slop.how/openapi.json](https://api.slop.how/openapi.json) is generated from the Zod schemas in [src/schema.ts](./src/schema.ts), and a copy is committed as [openapi.json](./openapi.json). TypeScript callers can get a typed client from Hono with the exported `AppType`. Other Workers can call `analyze({ text })` directly over a service binding.
 

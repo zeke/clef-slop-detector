@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { modelIds } from "./clef.ts";
+import { modelIds, models } from "./clef.ts";
 import { FACTORS_VERSION, type FactorId, factorIds } from "./factors.ts";
 
 /** Hard cap on request size (~90k words, at most 5 Clef calls) since the API is unauthenticated. */
@@ -7,10 +7,20 @@ export const MAX_TEXT_CHARS = 500_000;
 
 const Probability = z.number().min(0).max(1);
 
-export const Model = z.enum(modelIds).openapi({
-	description:
-		"Decision model. clef (default) is Cloudflare's 27B model and the most precise; clef-flash is its faster, cheaper 9B sibling; jev is TypeSafe's model via AI Gateway: cheapest and a bit more sensitive, with slightly more false positives.",
+const Model = z.enum(modelIds);
+
+const modelList = modelIds
+	.map((id) => `- \`${id}\`: ${models[id].description}`)
+	.join("\n");
+
+const RequestModel = Model.openapi({
+	description: `Which decision model to score with:\n\n${modelList}`,
+	"x-enumDescriptions": Object.fromEntries(
+		modelIds.map((id) => [id, models[id].description]),
+	),
 });
+
+const fmt = (n: number) => n.toLocaleString("en-US");
 
 export const AnalyzeRequest = z
 	.object({
@@ -19,10 +29,11 @@ export const AnalyzeRequest = z
 			.max(MAX_TEXT_CHARS)
 			.regex(/\S/, "text must contain non-whitespace characters")
 			.openapi({
+				description: `The text to analyze, up to ${fmt(MAX_TEXT_CHARS)} characters. Text over ${fmt(models.clef.maxChunkWords)} words (${fmt(models.jev.maxChunkWords)} on jev) is split into chunks, one model call each.`,
 				example:
 					"In today's fast-paced digital landscape, it's important to note that...",
 			}),
-		model: Model.default("clef"),
+		model: RequestModel.default("clef"),
 	})
 	.openapi("AnalyzeRequest");
 
@@ -39,23 +50,40 @@ export const AnalyzeResponse = z
 				"Factor definition version. Results change when this changes.",
 			example: FACTORS_VERSION,
 		}),
-		model: Model,
-		factors: z.object(
-			Object.fromEntries(factorIds.map((id) => [id, FactorResult])) as Record<
-				FactorId,
-				typeof FactorResult
-			>,
-		),
+		model: Model.openapi({
+			description: "The model that produced these scores",
+		}),
+		factors: z
+			.object(
+				Object.fromEntries(factorIds.map((id) => [id, FactorResult])) as Record<
+					FactorId,
+					typeof FactorResult
+				>,
+			)
+			.openapi({
+				description:
+					"Probability for every factor, keyed by factor id. See GET /v1/factors for definitions.",
+			}),
 		usage: z
 			.object({
 				chunks: z.number().int().positive().openapi({
-					description: "Number of Clef calls. Long text is split into chunks.",
+					description: "Number of model calls. Long text is split into chunks.",
 				}),
-				words: z.number().int().nonnegative(),
-				inputTokens: z.number().int().nonnegative(),
-				costUsd: z.number().nonnegative(),
+				words: z
+					.number()
+					.int()
+					.nonnegative()
+					.openapi({ description: "Word count of the submitted text" }),
+				inputTokens: z.number().int().nonnegative().openapi({
+					description:
+						"Input tokens billed across all chunks, including the factor questions",
+				}),
+				costUsd: z.number().nonnegative().openapi({
+					description:
+						"Estimated cost of this request in USD, from the model's per-token price",
+				}),
 			})
-			.openapi("Usage"),
+			.openapi("Usage", { description: "What the request cost" }),
 	})
 	.openapi("AnalyzeResponse");
 

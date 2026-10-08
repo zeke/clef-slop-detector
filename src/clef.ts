@@ -12,17 +12,23 @@ export const models = {
 		runId: "@cf/cloudflare/clef",
 		pricePerMillionInputTokens: 0.24,
 		maxChunkWords: 20_000,
+		description:
+			"Default. Cloudflare's 27B decision model. The most precise in testing, with no false positives.",
 	},
 	"clef-flash": {
 		runId: "@cf/cloudflare/clef-flash",
 		pricePerMillionInputTokens: 0.09,
 		maxChunkWords: 20_000,
+		description:
+			"Clef's faster, cheaper 9B sibling. Misses a few more subtle cases.",
 	},
 	// TypeSafe's Jev, a third-party model routed through AI Gateway and billed from AI Gateway credits.
 	jev: {
 		runId: "typesafe/jev",
 		pricePerMillionInputTokens: 0.042,
 		maxChunkWords: 10_000,
+		description:
+			"TypeSafe's Jev, via Cloudflare AI Gateway. About 6x cheaper than clef and a bit more sensitive, but flags slightly more false positives.",
 	},
 } as const;
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import committedOpenApi from "../openapi.json" with { type: "json" };
 import { app, openApiDocument } from "../src/app.ts";
+import { modelIds, models } from "../src/clef.ts";
 import { FACTORS_VERSION, factorIds, factors } from "../src/factors.ts";
 import {
 	AnalyzeResponse,
@@ -94,6 +95,37 @@ describe("OpenAPI", () => {
 		expect(Object.keys(doc.paths)).toEqual(
 			expect.arrayContaining(["/v1/analyze", "/v1/factors"]),
 		);
+	});
+
+	it("documents every request option and response field", () => {
+		type Prop = {
+			description?: string;
+			"x-enumDescriptions"?: Record<string, string>;
+		};
+		const schemas = openApiDocument().components?.schemas as Record<
+			string,
+			{ properties: Record<string, Prop> }
+		>;
+		const req = schemas.AnalyzeRequest?.properties ?? {};
+		expect(req.text?.description).toMatch(/500,000 characters/);
+		for (const id of modelIds) {
+			expect(req.model?.description).toContain(`\`${id}\``);
+			expect(req.model?.description).toContain(models[id].description);
+		}
+		expect(req.model?.["x-enumDescriptions"]).toEqual(
+			Object.fromEntries(modelIds.map((id) => [id, models[id].description])),
+		);
+		for (const [name, prop] of Object.entries(schemas.Usage?.properties ?? {}))
+			expect(prop.description, `Usage.${name}`).toBeTruthy();
+		for (const name of ["version", "model", "factors"])
+			expect(
+				schemas.AnalyzeResponse?.properties[name]?.description,
+				`AnalyzeResponse.${name}`,
+			).toBeTruthy();
+		// usage is a $ref, so its description lives on the Usage component.
+		expect(
+			(schemas.Usage as { description?: string }).description,
+		).toBeTruthy();
 	});
 
 	it("committed openapi.json matches the schemas (run script/openapi to update)", () => {

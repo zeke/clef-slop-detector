@@ -31,18 +31,18 @@ describe("buildClefRequest", () => {
 
 describe("models", () => {
 	it("maps each model to its Workers AI id, price, and chunk size", () => {
-		expect(models.clef).toEqual({
+		expect(models.clef).toMatchObject({
 			runId: "@cf/cloudflare/clef",
 			pricePerMillionInputTokens: 0.24,
 			maxChunkWords: 20_000,
 		});
-		expect(models["clef-flash"]).toEqual({
+		expect(models["clef-flash"]).toMatchObject({
 			runId: "@cf/cloudflare/clef-flash",
 			pricePerMillionInputTokens: 0.09,
 			maxChunkWords: 20_000,
 		});
 		// Jev's context window is 32k tokens, half of Clef's 64k.
-		expect(models.jev).toEqual({
+		expect(models.jev).toMatchObject({
 			runId: "typesafe/jev",
 			pricePerMillionInputTokens: 0.042,
 			maxChunkWords: 10_000,
