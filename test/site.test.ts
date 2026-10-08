@@ -48,7 +48,7 @@ describe("GET / (website)", () => {
 	it("links to the GitHub repo with an Octocat icon", async () => {
 		const html = await (await get("https://slop.how/")).text();
 		expect(html).toMatch(
-			/<a [^>]*href="https:\/\/github\.com\/zeke\/clef-slop-detector"[^>]*>\s*<svg/,
+			/<a [^>]*href="https:\/\/github\.com\/zeke\/slop\.how"[^>]*>\s*<svg/,
 		);
 	});
 

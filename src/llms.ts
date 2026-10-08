@@ -34,7 +34,7 @@ ${factorIds.map((id) => `- \`${id}\` (${factors[id].label}): ${factors[id].advic
 
 ## Optional
 
-- [Source code](https://github.com/zeke/clef-slop-detector)
+- [Source code](https://github.com/zeke/slop.how)
 - [Clef model](https://developers.cloudflare.com/workers-ai/models/clef/)
 `;
 }

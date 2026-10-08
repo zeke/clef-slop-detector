@@ -39,5 +39,6 @@ describe("GET /llms.txt", () => {
 		expect(body).toContain(
 			"[Factor definitions](https://example.dev/v1/factors)",
 		);
+		expect(body).toContain("[Source code](https://github.com/zeke/slop.how)");
 	});
 });
