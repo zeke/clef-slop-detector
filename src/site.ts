@@ -43,15 +43,18 @@ main { width: 100%; max-width: 42rem; padding: 3rem 1.5rem; box-sizing: border-b
 h1 { font-family: "Creepster", system-ui, sans-serif; font-weight: 400; font-size: 5.5rem; line-height: 1; color: var(--slime); margin: 0 0 0.75rem; }
 .tagline { font-size: 1.35rem; margin: 0 0 3rem; text-wrap: balance; }
 .label { font-size: 0.8rem; opacity: 0.6; margin: 0 0 0.5rem; text-align: left; }
-.label code { font-size: inherit; }
 .block { position: relative; text-align: left; margin: 0 0 2.5rem; border-radius: 8px; background: color-mix(in srgb, currentColor 7%, transparent); }
 pre { margin: 0; padding: 1rem 1.25rem; font-size: 0.8rem; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
 #prompt { padding-right: 5rem; }
 #response { white-space: pre; overflow-x: auto; }
+.reply { padding: 1rem 1.25rem; font-size: 0.95rem; line-height: 1.6; }
+.reply p { margin: 0 0 0.75rem; }
+.reply blockquote { margin: 0; padding-left: 1rem; border-left: 3px solid var(--slime); }
 button { position: absolute; top: 0.6rem; right: 0.6rem; font: inherit; font-size: 0.75rem; padding: 0.2rem 0.75rem; cursor: pointer; color: inherit; background: light-dark(#fff, #222); border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 6px; }
 button:hover { border-color: var(--slime); }
 a { color: inherit; opacity: 0.6; }
 a:hover { opacity: 1; color: var(--slime); }
+.label a { opacity: 1; }
 </style>
 </head>
 <body>
@@ -63,9 +66,15 @@ a:hover { opacity: 1; color: var(--slime); }
 <button type="button" id="copy">Copy</button>
 <pre id="prompt">${prompt}</pre>
 </div>
-<p class="label">Response from <code>POST ${API_ORIGIN}/v1/analyze</code></p>
+<p class="label"><a href="${API_ORIGIN}">api.slop.how</a> responds with slop score data:</p>
 <div class="block">
 <pre id="response">${compactJson(exampleResponse)}</pre>
+</div>
+<p class="label">Your agent checks the scores and responds:</p>
+<div class="block reply">
+<p>The text is built from stock parts: a generic opener, buzzwords like "leveraging" and "unlock," a fake contrast between trend and revolution, a rhetorical question, and a "Let's dive in" sign-off. It makes big claims with no specifics to back them.</p>
+<p>Here is a revised version:</p>
+<blockquote>Remote work is here to stay. With good collaboration tools, teams can get more done and try new ideas more easily.</blockquote>
 </div>
 <a href="${REPO_URL}" aria-label="GitHub repository">${octocat}</a>
 </main>
