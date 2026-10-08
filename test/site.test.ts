@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { app } from "../src/app.ts";
+import { AnalyzeResponse } from "../src/schema.ts";
 import { fakeAi } from "./helpers.ts";
 
 const get = (url: string) => app.request(url, {}, { AI: fakeAi() });
@@ -20,7 +21,28 @@ describe("GET / (website)", () => {
 			"Use https://slop.how/llms.txt to review this text:",
 		);
 		expect(html).toContain("In today's fast-paced digital landscape");
-		expect(html).toMatch(/<button[^>]*>Copy<\/button>/);
+	});
+
+	it("puts the copy button inside the prompt block", async () => {
+		const html = await (await get("https://slop.how/")).text();
+		expect(html).toMatch(
+			/<div class="block">\s*<button[^>]*>Copy<\/button>\s*<pre id="prompt">/,
+		);
+	});
+
+	it("uses a drippy display font for the heading", async () => {
+		const html = await (await get("https://slop.how/")).text();
+		expect(html).toContain("family=Creepster");
+		expect(html).toMatch(/h1 \{[^}]*font-family: "Creepster"/);
+	});
+
+	it("shows an example API response that matches the response schema", async () => {
+		const html = await (await get("https://slop.how/")).text();
+		expect(html).toContain("POST https://api.slop.how/v1/analyze");
+		const json = html.match(/<pre id="response">([\s\S]*?)<\/pre>/)?.[1];
+		expect(json).toBeDefined();
+		const parsed = AnalyzeResponse.parse(JSON.parse(json ?? ""));
+		expect(parsed.factors.canned_opening.probability).toBeGreaterThan(0.7);
 	});
 
 	it("links to the GitHub repo with an Octocat icon", async () => {
