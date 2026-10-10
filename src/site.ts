@@ -96,19 +96,15 @@ nav { display: flex; justify-content: space-between; align-items: center; gap: 2
 nav div { display: flex; align-items: center; gap: 28px; }
 nav .gh { color: var(--ink); display: inline-flex; }
 .hero { padding: 96px 0 80px; text-align: center; }
-h1 { font: 400 29.9cqi/0.93 Creepster, system-ui, sans-serif; letter-spacing: -0.01em; color: var(--pink); }
+h1 { font: 400 29.9cqi/0.93 Creepster, system-ui, sans-serif; letter-spacing: -0.01em; color: var(--pink); filter: url(#ooze); }
 .tagline { padding-top: 24px; font-weight: 600; font-size: clamp(28px, 3.4cqi, 44px); line-height: 1.2; letter-spacing: -0.02em; text-wrap: balance; }
 .split { display: grid; grid-template-columns: 600fr 648fr; gap: 48px; }
 .readout { padding-top: 48px; border-top: 1px solid var(--rule); align-items: start; }
 .stack { display: flex; flex-direction: column; gap: 16px; }
-.stack + .stack { margin-top: 32px; }
 .box { position: relative; padding: 22px 24px; border: 1px solid var(--rule); border-radius: 6px; background: var(--box); }
 pre { margin: 0; font: 19px/30px var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 #copy { position: absolute; top: 12px; right: 12px; padding: 3px 10px; font: 600 14px/20px var(--mono); color: var(--bg); background: var(--pink); border: 0; border-radius: 4px; cursor: pointer; }
 #copy:hover { filter: brightness(1.15); }
-.reply { color: var(--prose); }
-.reply p + p, .reply p + blockquote { margin-top: 16px; }
-.reply blockquote { margin: 0; padding-left: 16px; border-left: 3px solid var(--pink); color: var(--ink); }
 .scores { display: flex; flex-direction: column; gap: 14px; font: 19px/26px var(--mono); color: var(--dim); }
 .score { display: flex; align-items: center; gap: 16px; }
 .score a { width: 230px; flex-shrink: 0; overflow-wrap: anywhere; }
@@ -155,6 +151,12 @@ footer a { display: inline-flex; align-items: center; gap: 14px; }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+<filter id="ooze" x="-6%" y="-12%" width="112%" height="135%">
+<feTurbulence id="ooze-noise" type="fractalNoise" baseFrequency="0.008 0.014" numOctaves="1" seed="3"/>
+<feDisplacementMap id="ooze-map" in="SourceGraphic" scale="48" xChannelSelector="R" yChannelSelector="G"/>
+</filter>
+</svg>
 <main>
 <nav>
 <a href="${api}">${apiHost}</a>
@@ -170,21 +172,11 @@ footer a { display: inline-flex; align-items: center; gap: 14px; }
 <p class="tagline">${tagline}</p>
 </div>
 <div class="split readout">
-<div>
 <div class="stack">
 <p class="label">Paste this into your agent:</p>
 <div class="box">
 <button type="button" id="copy">copy</button>
 <pre id="prompt">${prompt(promptTarget(requestUrl))}</pre>
-</div>
-</div>
-<div class="stack">
-<p class="label">Your agent responds:</p>
-<div class="box reply">
-<p>The text is built from stock parts: a generic opener, buzzwords like "leveraging" and "unlock," a fake contrast between trend and revolution, a rhetorical question, and a "Let's dive in" sign-off. It makes big claims with no specifics to back them.</p>
-<p>Here is a revised version:</p>
-<blockquote>Remote work is here to stay. With good collaboration tools, teams can get more done and try new ideas more easily.</blockquote>
-</div>
 </div>
 </div>
 <div class="stack">
@@ -241,6 +233,27 @@ ${modelList}
 </footer>
 </main>
 <script>
+// Ooze the wordmark. The filter values are tuned for a 1296px-wide heading,
+// so scale them to its real width. baseFrequency drifts along sine waves whose
+// periods (seconds) never line up, so the goo never visibly repeats or rewinds.
+// With reduced motion it stays melted but still.
+const heading = document.querySelector("h1");
+const noise = document.getElementById("ooze-noise");
+const map = document.getElementById("ooze-map");
+const wave = (t, a, b, pa, pb) => 0.6 * Math.sin((2 * Math.PI * t) / a + pa) + 0.4 * Math.sin((2 * Math.PI * t) / b + pb);
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function ooze(ms) {
+	const t = ms / 1000;
+	const k = 1296 / heading.clientWidth;
+	const fx = (0.008 + 0.002 * wave(t, 5.3, 8.9, 0, 1.3)) * k;
+	const fy = (0.014 + 0.004 * wave(t, 6.1, 11.7, 2.1, 0.4)) * k;
+	noise.setAttribute("baseFrequency", fx.toFixed(5) + " " + fy.toFixed(5));
+	map.setAttribute("scale", (48 / k).toFixed(1));
+	if (!still) requestAnimationFrame(ooze);
+}
+requestAnimationFrame(ooze);
+if (still) addEventListener("resize", () => requestAnimationFrame(ooze));
+
 const copy = document.getElementById("copy");
 copy.addEventListener("click", async () => {
 	await navigator.clipboard.writeText(document.getElementById("prompt").textContent);

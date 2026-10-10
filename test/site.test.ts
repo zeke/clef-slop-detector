@@ -64,14 +64,12 @@ describe("GET / (website)", () => {
 		expect(html).toMatch(/h1 \{[^}]*Creepster/);
 	});
 
-	it("shows an example agent reply under the prompt", async () => {
+	it("oozes the wordmark with a drifting SVG displacement filter", async () => {
 		const html = await (await get("https://slop.how/")).text();
-		const promptAt = html.indexOf('<pre id="prompt">');
-		const replyAt = html.indexOf("Your agent responds:");
-		expect(promptAt).toBeGreaterThan(-1);
-		expect(replyAt).toBeGreaterThan(promptAt);
-		expect(html).toContain("The text is built from stock parts");
-		expect(html).toMatch(/<blockquote>\s*Remote work is here to stay\./);
+		expect(html).toMatch(/h1 \{[^}]*filter: url\(#ooze\)/);
+		expect(html).toContain('<filter id="ooze"');
+		expect(html).toContain('<feTurbulence id="ooze-noise"');
+		expect(html).toContain("prefers-reduced-motion: reduce");
 	});
 
 	it("has an example API response that matches the response schema", () => {
