@@ -1,13 +1,13 @@
 # slop.how
 
-A fast and free API for detecting sloppy text
+A fast and free API for analyzing sloppy writing.
 
 It scores text for "slop": the stylistic tells that show up in a lot of AI-generated writing, like canned openings, negation reframes ("It's not X, it's Y"), buzzwords, and chatbot residue. It lives at [slop.how](https://slop.how).
 
 Paste this into your coding agent:
 
 ```
-Use https://slop.how/llms.txt to review this text:
+Use slop.how to review this text:
 
 In today's fast-paced digital landscape, remote work isn't just a trend. It's a
 revolution. By leveraging cutting-edge collaboration tools, teams can unlock

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { app } from "../src/app.ts";
+import { models } from "../src/clef.ts";
+import exampleResponse from "../src/example-response.json" with {
+	type: "json",
+};
 import { factorIds, factors } from "../src/factors.ts";
 import { AnalyzeResponse } from "../src/schema.ts";
 import { fakeAi } from "./helpers.ts";
@@ -15,76 +19,104 @@ describe("GET / (website)", () => {
 		expect(html).toMatch(/^<!doctype html>/i);
 		expect(html).toContain("<title>slop.how</title>");
 		expect(html).toContain(
-			'<p class="tagline">A fast and free API for detecting sloppy text</p>',
+			'<p class="tagline">A fast and free API for analyzing sloppy writing.</p>',
 		);
 		expect(html).toContain(
-			'<meta name="description" content="A fast and free API for detecting sloppy text">',
+			'<meta name="description" content="A fast and free API for analyzing sloppy writing.">',
 		);
 	});
 
-	it("includes a copy-paste agent prompt pointing at llms.txt", async () => {
+	it("includes a copy-paste agent prompt that names slop.how", async () => {
 		const html = await (await get("https://slop.how/")).text();
-		expect(html).toContain(
-			"Use https://slop.how/llms.txt to review this text:",
-		);
+		expect(html).toContain("Use slop.how to review this text:");
 		expect(html).toContain("In today's fast-paced digital landscape");
 		expect(html).toContain('<a href="https://api.slop.how">api.slop.how</a>');
+	});
+
+	it("lets agents find llms.txt from the homepage", async () => {
+		const html = await (await get("https://slop.how/")).text();
+		expect(html).toContain(
+			'<link rel="alternate" type="text/markdown" href="/llms.txt"',
+		);
+		expect(html).toContain('<a class="path" href="/llms.txt">/llms.txt</a>');
 	});
 
 	it("points the prompt and API link at the serving host on previews", async () => {
 		const origin = "https://pr-12-clef-slop-detector.ziki.workers.dev";
 		const html = await (await get(`${origin}/`)).text();
-		expect(html).toContain(`Use ${origin}/llms.txt to review this text:`);
+		expect(html).toContain(`Use ${origin} to review this text:`);
 		expect(html).toContain(
 			`<a href="${origin}">pr-12-clef-slop-detector.ziki.workers.dev</a>`,
 		);
-		expect(html).not.toContain("https://slop.how/llms.txt");
+		expect(html).not.toContain("Use slop.how");
 	});
 
 	it("puts the copy button inside the prompt block", async () => {
 		const html = await (await get("https://slop.how/")).text();
 		expect(html).toMatch(
-			/<div class="block">\s*<button[^>]*>Copy<\/button>\s*<pre id="prompt">/,
+			/<div class="box">\s*<button[^>]*>copy<\/button>\s*<pre id="prompt">/,
 		);
 	});
 
 	it("uses a drippy display font for the heading", async () => {
 		const html = await (await get("https://slop.how/")).text();
 		expect(html).toContain("family=Creepster");
-		expect(html).toMatch(/h1 \{[^}]*font-family: "Creepster"/);
+		expect(html).toMatch(/h1 \{[^}]*Creepster/);
 	});
 
-	it("shows an example agent reply after the API response", async () => {
+	it("oozes the wordmark with a drifting SVG displacement filter", async () => {
 		const html = await (await get("https://slop.how/")).text();
-		const responseAt = html.indexOf('<pre id="response">');
-		const replyAt = html.indexOf("Your agent checks the scores and responds:");
-		expect(responseAt).toBeGreaterThan(-1);
-		expect(replyAt).toBeGreaterThan(responseAt);
-		expect(html).toContain("The text is built from stock parts");
-		expect(html).toMatch(/<blockquote>\s*Remote work is here to stay\./);
+		expect(html).toMatch(/h1 \{[^}]*filter: url\(#ooze\)/);
+		expect(html).toContain('<filter id="ooze"');
+		expect(html).toContain('<feTurbulence id="ooze-noise"');
+		expect(html).toContain("prefers-reduced-motion: reduce");
 	});
 
-	it("shows an example API response that matches the response schema", async () => {
+	it("has an example API response that matches the response schema", () => {
+		const parsed = AnalyzeResponse.parse(exampleResponse);
+		expect(parsed.factors.canned_opening.probability).toBeGreaterThan(0.7);
+	});
+
+	it("shows every factor's example score as a bar, highest first", async () => {
 		const html = await (await get("https://slop.how/")).text();
 		expect(html).toMatch(
-			/<a href="https:\/\/api\.slop\.how">api\.slop\.how<\/a> responds with slop score data:/,
+			/<a href="https:\/\/api\.slop\.how">api\.slop\.how<\/a> responds with:/,
 		);
-		const json = html.match(/<pre id="response">([\s\S]*?)<\/pre>/)?.[1];
-		expect(json).toBeDefined();
-		const parsed = AnalyzeResponse.parse(JSON.parse(json ?? ""));
-		expect(parsed.factors.canned_opening.probability).toBeGreaterThan(0.7);
+		const list = html.match(
+			/<ul class="scores" id="response">([\s\S]*?)<\/ul>/,
+		)?.[1];
+		const ids = [...(list ?? "").matchAll(/<a href="#(\w+)">/g)].map(
+			(m) => m[1],
+		);
+		expect(ids).toEqual(Object.keys(exampleResponse.factors));
+		expect(list).toContain(
+			'<li class="score hot"><a href="#canned_opening">canned_opening</a><span class="bar"><span style="width: 95%"></span></span><span class="value">0.95</span></li>',
+		);
+		expect(list).toMatch(/<li class="score"><a href="#hype_adjectives">/);
+	});
+
+	it("lists every model with its price", async () => {
+		const html = await (await get("https://slop.how/")).text();
+		for (const [id, model] of Object.entries(models)) {
+			expect(html).toContain(`<code class="name">${id}</code>`);
+			expect(html).toContain(
+				`$${model.pricePerMillionInputTokens} per million input tokens`,
+			);
+		}
 	});
 
 	it("lists every factor as a deep-linkable label and instruction", async () => {
 		const html = await (await get("https://slop.how/")).text();
 		for (const id of factorIds) {
-			const item = html.match(new RegExp(`<li id="${id}">(.*?)</li>`))?.[1];
+			const item = html.match(
+				new RegExp(`<li class="row" id="${id}">(.*?)</li>`),
+			)?.[1];
 			expect(item).toContain(
-				`<a href="#${id}"><strong>${factors[id].label.replace("&", "&amp;")}</strong></a>`,
+				`<a class="name" href="#${id}">${factors[id].label.replace("&", "&amp;")}</a>`,
 			);
 		}
 		expect(html).toContain(
-			"<strong>Negation reframe</strong></a> Does the text set up a contrast",
+			"Negation reframe</a><p>Does the text set up a contrast",
 		);
 	});
 
